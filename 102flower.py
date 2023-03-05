@@ -12,7 +12,7 @@ PATH_VALID = "..\dataset\\102flowers_categorized\dataset\\valid\\"
 PATH_TEST = "..\dataset\\102flowers_categorized\dataset\\smalltest\\"
 model_path = ".\weight\\result_weight_model.pt"
 
-perform_index = True
+perform_index = False
 
 # Datasets and Dataloaders
 flower_train_data = TripletData(PATH_TRAIN, flower_transforms.train_transforms)

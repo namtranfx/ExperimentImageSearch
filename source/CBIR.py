@@ -6,6 +6,7 @@ import torch
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.image import imread
 from faiss import write_index, read_index
 
 
@@ -68,12 +69,13 @@ class FlowerImageSearch:
                 # Show retrieved result
                 fig, axs = plt.subplots(numrow, numcol)
                 fig.suptitle("Retrieved Result")
-                idx_img = 1
-                axs[0,0].imshow(im)
+                idx_img = 0
+                axs[0,0].imshow(imread(os.path.join(img_input_path,f)))
                 for i in range(numrow):
                     for j in range(numcol):
-                        if (i * numcol + j) != idx_img: continue
-                        axs[i,j].imshow(Image.open(self._im_indices[I[0][idx_img]]))
+                        if (i * numcol + j) == 0: continue
+                        axs[i,j].imshow(imread(self._im_indices[I[0][idx_img]]))
+                        idx_img = idx_img + 1
                 print("Retrieved Image: {}".format(self._im_indices[I[0][0]]))
                 plt.show()
     
