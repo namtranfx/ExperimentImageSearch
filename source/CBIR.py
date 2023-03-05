@@ -5,10 +5,16 @@ import faiss
 import torch
 from PIL import Image
 import numpy as np
+import matplotlib.pyplot as plt
+from faiss import write_index, read_index
 
 
 from source.data_handler import MyTransforms
 from source.features import ResDeepFeature
+
+# VARIABLE
+index_path = ".\index\\102flower.index"
+db_imgpath = ".\index\\db_imgpath.npy"
 
 class FlowerImageSearch:
     def __init__(self) -> None:
@@ -39,8 +45,17 @@ class FlowerImageSearch:
                 self._faiss_index.add(preds) #add the representation to index
                 self._im_indices.append(f)   #store the image name to find it later on
         print("Indexing successfully!")
+        write_index(self._faiss_index, index_path)
+        np.save(db_imgpath, self._im_indices)
+        print("Index Saved!")
 
-    def retrieving(self, img_input_path):
+    def retrieving(self, img_input_path, load_index = 0):
+        if load_index == 1:
+            self._faiss_index = read_index(index_path)
+            self._im_indices = np.load(db_imgpath)
+        numcol = 3
+        numrow = 2
+
         with torch.no_grad():
             for f in os.listdir(img_input_path):
                 print("------------query image: ", f)
@@ -50,5 +65,15 @@ class FlowerImageSearch:
             
                 test_embed = self._m_model.extractFeature(im).cpu().numpy()
                 _, I = self._faiss_index.search(test_embed, 5)
+                # Show retrieved result
+                fig, axs = plt.subplots(numrow, numcol)
+                fig.suptitle("Retrieved Result")
+                idx_img = 1
+                axs[0,0].imshow(im)
+                for i in range(numrow):
+                    for j in range(numcol):
+                        if (i * numcol + j) != idx_img: continue
+                        axs[i,j].imshow(Image.open(self._im_indices[I[0][idx_img]]))
                 print("Retrieved Image: {}".format(self._im_indices[I[0][0]]))
+                plt.show()
     
