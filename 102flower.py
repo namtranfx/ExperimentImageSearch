@@ -10,9 +10,10 @@ flower_transforms = MyTransforms()
 PATH_TRAIN = "..\dataset\\102flowers_categorized\dataset\\train\\"
 PATH_VALID = "..\dataset\\102flowers_categorized\dataset\\valid\\"
 PATH_TEST = "..\dataset\\102flowers_categorized\dataset\\smalltest\\"
-model_path = ".\weight\\result_weight_model.pt"
+
 
 perform_index = False
+eval_mode = True
 
 # Datasets and Dataloaders
 flower_train_data = TripletData(PATH_TRAIN, flower_transforms.train_transforms)
@@ -25,12 +26,12 @@ flower_search = FlowerImageSearch()
 
 
 #flower_search.trainDescriptor(flower_train_loader)
-#flower_search.saveDescriptorWeight(model_path=model_path)
-flower_search.loadDescriptorWeight(model_path=model_path)
+#flower_search.saveDescriptorWeight()
 if perform_index == True:
     flower_search.indexing(PATH_TRAIN)
+if eval_mode == False:
     flower_search.retrieving(PATH_TEST)
 else:
-    flower_search.retrieving(PATH_TEST, 1) # Set to 0 if want to perform index
+    flower_search.evalOnDataset(PATH_VALID, k_top=5)
 
 

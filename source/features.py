@@ -14,6 +14,8 @@ class ResDeepFeature:
         self.model = models.resnet18().cpu()
         self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
         self.triplet_loss = TripletLoss()
+        self.is_loaded = False
+        self.MODEL_PATH = ".\weight\\result_weight_model.pt"
     
     def trainDescriptor(self, train_loader):
         print("Training our Desciptor")
@@ -36,13 +38,19 @@ class ResDeepFeature:
                 loss.backward()
                 self.optimizer.step()
             print("Train Loss: {}".format(epoch_loss.item()))
+        self.is_loaded = True
         print("Training completed!")
-    def saveDescriptor(self, path):
-        print("Saving your descriptor...")
-        torch.save(self.model.state_dict(), path)
-    def loadDescriptor(self, path):
-        self.model.load_state_dict(torch.load(path))
+    def saveDescriptor(self):
+        
+        torch.save(self.model.state_dict(), self.MODEL_PATH)
+        print("Your feature descriptor saved!!")
+    def loadDescriptor(self):
+        if self.is_loaded == True:
+            print("Your feature descriptor is loaded!")
+            return
+        self.model.load_state_dict(torch.load(self.MODEL_PATH))
         self.model.eval()
         print("Loading your descriptor completed!")
+        self.is_loaded = True
     def extractFeature(self, img):
         return self.model(img)
