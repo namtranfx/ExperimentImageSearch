@@ -2,20 +2,126 @@ from torchvision import models
 import torch.optim as optim
 from tqdm import tqdm
 import torch
-
+import numpy as np
+from skimage.feature import hog # Import Hog model to extract features
+import cv2
 
 from source.losses import TripletLoss
+from source.data_handler import MyTransform_norm, MyTransform
+
+
+
+
+class FeatureDescriptor:
+    def __init__(self) -> None:
+        self._device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.is_loaded = False
+        self.MODEL_PATH = ".\weight\\result_weight_model.pt"
+        # self.MODEL_PATH = ".\weight\\resnet18.pth"
+        self.model = None
+        self.self_trained = False
+        self._m_data_transform = MyTransform()
+    def trainDescriptor(self):
+        pass
+    def saveDescriptor(self):
+        torch.save(self.model.state_dict(), self.MODEL_PATH)
+        print("Your feature descriptor saved!!")
+    def loadDescriptor(self):
+        pass
+    def extractFeature(self, img):
+        # img = img.resize((224,224))
+        # img = torch.tensor([self._m_data_transform.val_transforms(img).numpy()]).to(device=self._device)
+        # img = torch.tensor(np.array([self._m_data_transform.process(img).numpy()])).to(device=self._device)
+        
+        output = self.model(img)
+        # print("[features.py]: shape of output: ", output.shape)
+        return output.view(output.size(0), -1) # Flatten the output
+
+class HOGFeature(FeatureDescriptor):
+    def resize_(image):
+        u = cv2.resize(image,(224,224))
+        return u
+
+    def rgb2gray(rgb):
+        gray = cv2.cvtColor(rgb, cv2.COLOR_BGR2GRAY)
+        return gray
+    def __init__(self) -> None:
+        super().__init__()
+        
+    def extractFeature(self, img):
+        img = self.resize_(img)
+        img = self.rgb2gray(img)
+        fd = hog(img, orientations=8, pixels_per_cell=(64, 64),block_norm ='L2', cells_per_block=(2, 2))
+        return fd
+
+class MobileNetV3Feature(FeatureDescriptor):
+    def __init__(self) -> None:
+        super().__init__()
+        self.model = models.mobilenet_v3_small(weights=models.MobileNet_V3_Small_Weights.DEFAULT).cpu()
+        #self.model = models.mobilenet_v3_large(weights=models.MobileNet_V3_Large_Weights.DEFAULT).cpu()
+        
+        self.model = self.model.features
+    def extractFeature(self, img):
+        feature = self.model(img)
+        #print("Shape of feature = ", feature.shape)
+        # return torch.flatten(feature, start_dim=1)
+        compact_f = torch.nn.AdaptiveAvgPool2d(1)(feature)
+        final_f = torch.flatten(compact_f, start_dim=1)
+        # print("[MobileNet feature]: shape of final feature = ", final_f.shape)
+        return final_f
+class MobileNetV3Feature_flatten(MobileNetV3Feature):
+    def extractFeature(self, img):
+        feature = self.model(img)
+        # print("Shape of feature = ", feature.shape)
+        # return torch.flatten(feature, start_dim=1)
+        # compact_f = torch.nn.AdaptiveAvgPool2d(1)(feature)
+        final_f = torch.flatten(feature, start_dim=1)
+        #print("shape of final feature = ", final_f.shape)
+        return final_f
+class MobileNetV3Feature_large(MobileNetV3Feature):
+    def __init__(self) -> None:
+        super().__init__()
+        self.model = models.mobilenet_v3_large(weights=models.MobileNet_V3_Large_Weights.DEFAULT).cpu()
+        self.model = self.model.features
+class MobileNetV3Feature_large_flatten(MobileNetV3Feature_large):
+    def extractFeature(self, img):
+        feature = self.model(img)
+        # print("Shape of feature = ", feature.shape)
+        # return torch.flatten(feature, start_dim=1)
+        # compact_f = torch.nn.AdaptiveAvgPool2d(1)(feature)
+        final_f = torch.flatten(feature, start_dim=1)
+        #print("shape of final feature = ", final_f.shape)
+        return final_f
+
+class MobileNetV3_custom(FeatureDescriptor):
+    def __init__(self) -> None:
+        super().__init__()
+        model = models.mobilenet_v3_small(weights=models.MobileNet_V3_Small_Weights.DEFAULT).cpu()
+        self.model = torch.nn.Sequential(*(list(model.children())[:-1])) # strips off last linear layer
+        
+    
 
 
 # Our base model
-class ResDeepFeature:
-    def __init__(self, device):
-        self._device = device
-        self.model = models.resnet18().cpu()
+class ResDeepFeature(FeatureDescriptor):
+    def __init__(self):
+        super().__init__()
+        self.self_trained = True
+        
+        # Load model from our self trained model
+        model = models.resnet18().cpu() # Full model
+        # self.model = torch.nn.Sequential(*(list(model.children())[:-1])) # strips off last linear layer
+
+        if self.self_trained == True:
+            model.load_state_dict(torch.load(self.MODEL_PATH))
+            model.eval()
+            print("Your feature descriptor is loaded!")
+        self.model = torch.nn.Sequential(*(list(model.children())[:-1])) # strips off last linear layer
+        
+        self.is_loaded = True
+        # Use for self trainning model 
         self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
         self.triplet_loss = TripletLoss()
-        self.is_loaded = False
-        self.MODEL_PATH = ".\weight\\result_weight_model.pt"
     
     def trainDescriptor(self, train_loader):
         print("Training our Desciptor")
@@ -40,17 +146,120 @@ class ResDeepFeature:
             print("Train Loss: {}".format(epoch_loss.item()))
         self.is_loaded = True
         print("Training completed!")
-    def saveDescriptor(self):
+    # def saveDescriptor(self):
         
-        torch.save(self.model.state_dict(), self.MODEL_PATH)
-        print("Your feature descriptor saved!!")
-    def loadDescriptor(self):
-        if self.is_loaded == True:
-            print("Your feature descriptor is loaded!")
-            return
-        self.model.load_state_dict(torch.load(self.MODEL_PATH))
-        self.model.eval()
-        print("Loading your descriptor completed!")
-        self.is_loaded = True
+    #     torch.save(self.model.state_dict(), self.MODEL_PATH)
+    #     print("Your feature descriptor saved!!")
+    # def loadDescriptor(self):
+    #     if self.is_loaded == True:
+    #         print("Your feature descriptor is loaded!")
+    #         return
+    #     if self.self_trained == True:
+    #         self.model.load_state_dict(torch.load(self.MODEL_PATH))
+    #         self.model.eval()
+    #     print("Your feature descriptor is loaded!")
+    #     self.is_loaded = True
+    # def extractFeature(self, img):
+    #     img = img.resize((224,224))
+    #     # img = torch.tensor([self._m_data_transform.val_transforms(img).numpy()]).to(device=self._device)
+    #     img = torch.tensor(np.array([self._m_data_transform.val_transforms(img).numpy()])).to(device=self._device)
+    #     output = self.model(img)
+    #     # print("----shape of output feature: ", output.view(output.size(0), -1).shape)
+    #     return output.view(output.size(0), -1) # Flatten the output
+
+from .TinyViT.tiny_vit import TinyViT, tiny_vit_21m_224, tiny_vit_5m_224
+class tinyvit(FeatureDescriptor):
+    def __init__(self) -> None:
+        super().__init__()
+        
+
+        # Tạo mô hình TinyViT-21M
+        #self.model = TinyViT()
+        #pretrained_weights = torch.load('tiny_vit_21m_22kto1k_distill.pth')
+        #self.model.load_state_dict(pretrained_weights)
+        # Đăng ký forward hook cho stage cuối cùng của mô hình
+        #handle = self.model.blocks[-1].register_forward_hook(self.get_last_stage_output)
+        self.model = tiny_vit_21m_224(pretrained=True)
+    def extractFeature(self, input):
+        
+
+        # Đưa dữ liệu qua mô hình
+        output = self.model.forward_features(input)
+        return output
+
+import torch.nn as nn
+
+from .EfficientViT.build import EfficientViT_M0
+class MyEfficientViT(FeatureDescriptor):
+    def __init__(self) -> None:
+        super().__init__()
+        model = EfficientViT_M0(pretrained='efficientvit_m0')
+        self.model = nn.Sequential(*list(model.children())[:-1])
     def extractFeature(self, img):
-        return self.model(img)
+        feature = self.model(img)
+        compact_f = torch.nn.AdaptiveAvgPool2d(1)(feature)
+        final_f = torch.flatten(compact_f, start_dim=1)
+        # print("[EfficientViT feature]: shape of final feature = ", final_f.shape)
+        return final_f
+class tinyvit_small(tinyvit):
+    def __init__(self) -> None:
+        self.model = tiny_vit_5m_224(pretrained = True)
+    # Định nghĩa một hàm forward hook để lấy giá trị đầu ra của stage cuối cùng
+    def get_last_stage_output(module, input, output):
+        global last_stage_output
+        last_stage_output = output
+
+       
+        
+class Resnet18_custom_best(FeatureDescriptor):
+    def __init__(self) -> None:
+        super().__init__()
+        self.MODEL_PATH = ".\weight\\resnet18.pth"
+        # Load model from our self trained model
+        model = models.resnet18().cpu() # Full model
+        model.load_state_dict(torch.load(self.MODEL_PATH))
+        model.eval()
+        self.model = torch.nn.Sequential(*(list(model.children())[:-1])) # strips off last linear layer
+        
+
+class Resnet18Descriptor(FeatureDescriptor):
+    def __init__(self) -> None:
+        super().__init__()
+        model = models.resnet18(models.ResNet18_Weights.DEFAULT).cpu()
+        # model = models.resnet18(models.ResNet18_Weights.IMAGENET1K_V1).cpu()
+        if self.self_trained == True:
+            model.load_state_dict(torch.load(self.MODEL_PATH))
+            model.eval()
+            print("Your feature descriptor is loaded!")
+        self.is_loaded = True
+        
+        self.model = torch.nn.Sequential(*(list(model.children())[:-1])) # strips off last linear layer
+
+
+class Resnet34Descriptor(FeatureDescriptor):
+    def __init__(self) -> None:
+        super().__init__()
+        model = models.resnet34(models.ResNet34_Weights.DEFAULT).cpu()
+        # model = models.resnet34(models.ResNet34_Weights.IMAGENET1K_V1).cpu()
+
+        if self.self_trained == True:
+            model.load_state_dict(torch.load(self.MODEL_PATH))
+            model.eval()
+            print("Your feature descriptor is loaded!")
+        self.is_loaded = True
+        self.model = torch.nn.Sequential(*(list(model.children())[:-1])) # strips off last linear layer
+
+
+class Resnet50Descriptor(FeatureDescriptor):
+    def __init__(self, ) -> None:
+        super().__init__()
+        model = models.resnet50(models.ResNet50_Weights.DEFAULT).cpu()
+        # model = models.resnet50(models.ResNet50_Weights.IMAGENET1K_V1).cpu()
+
+        if self.self_trained == True:
+            model.load_state_dict(torch.load(self.MODEL_PATH))
+            model.eval()
+            print("Your feature descriptor is loaded!")
+        self.is_loaded = True
+        self.model = torch.nn.Sequential(*(list(model.children())[:-1])) # strips off last linear layer
+        

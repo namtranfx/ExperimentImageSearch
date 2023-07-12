@@ -1,0 +1,5 @@
+*.pyc
+source/__pycache__/features.cpython-310.pyc
+source/__pycache__/CBIR.cpython-310.pyc
+data
+index
