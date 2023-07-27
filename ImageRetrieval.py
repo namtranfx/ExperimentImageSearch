@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader
 import torch
 import torchvision
 
-from source.data_handler import MyTransform, InriaHolidayDataset, CorelDataset, CaltechDataset, OxfordDataset, CifarDataset
+from source.data_handler import MyTransform, CaltechDataset, CifarDataset, Oxford102Flower, CustomCocoDataset
 from source.CBIR import CBIR
 from source.features import *
 from source.index import *
@@ -13,49 +13,70 @@ from source.ultis import to_rgb
 ################################# DATASET PATH #############################################
 ############################################################################################
 
-PATH_COREL5K = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\Corel-5k\\images"
-PATH_COREL10K = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\Corel-10k"
-PATH_HOLIDAY = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\The INRIA Holidays dataset\\jpg"
-PATH_OXFORD5K = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\oxbuild_images"
-PATH_CALTECH101 = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\caltech-101\\101_ObjectCategories"
-PATH_CALTECH256 = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\caltech-101\\256_ObjectCategories"
-PATH_CIFAR10 = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\cifar-10\\train"
+# PATH_COREL5K = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\Corel-5k\\images"
+# PATH_COREL10K = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\Corel-10k"
+# PATH_HOLIDAY = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\The INRIA Holidays dataset\\jpg"
+# PATH_OXFORD5K = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\oxbuild_images"
+# PATH_CALTECH256 = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\caltech-101\\256_ObjectCategories"
 
-datasetpath = [PATH_COREL5K, PATH_COREL10K, PATH_HOLIDAY, PATH_OXFORD5K, PATH_CALTECH101, PATH_CALTECH256]
+
+# datasetpath = [PATH_COREL5K, PATH_COREL10K, PATH_HOLIDAY, PATH_OXFORD5K, PATH_CALTECH101, PATH_CALTECH256]
 
 ############################################################################################
 ################################# CUSTOM DATASET ###########################################
 ############################################################################################
+transform_img = MyTransform()
 
-caltech101ds = CaltechDataset(PATH_CALTECH101, MyTransform())
-oxford5kds = OxfordDataset(PATH_OXFORD5K, MyTransform())
-corel5kds = CorelDataset(PATH_COREL5K, MyTransform())
-cifar10ds = CifarDataset(PATH_CIFAR10, MyTransform())
-inriaHolidayds = InriaHolidayDataset(PATH_HOLIDAY, MyTransform())
-
-# Split dataset into database(trainset) and evaluating set(testset)
-
+# CALTECH-101 DATASET
+PATH_CALTECH101 = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\caltech-101\\101_ObjectCategories"
+caltech101ds = CaltechDataset(PATH_CALTECH101, transform_img)
 caltech_train_indices, caltech_test_indices = train_test_split(range(len(caltech101ds)),stratify=caltech101ds.getLabels(), test_size=0.2)
-oxford_train_indices, oxford_test_indices = train_test_split(range(len(oxford5kds)),stratify=oxford5kds.getLabels(), test_size=0.2)
-corel5k_train_indices, corel5k_test_indices = train_test_split(range(len(corel5kds)),stratify=corel5kds.getLabels(), test_size=0.2)
-cifar10_train_indices, cifar10_test_indices = train_test_split(range(len(cifar10ds)),stratify=cifar10ds.getLabels(), test_size=0.2)
-inriaHoliday_train_indices, inriaHoliday_test_indices = train_test_split(range(len(inriaHolidayds)), shuffle=True, test_size=0.2)
-
-
 caltech101_train = torch.utils.data.Subset(caltech101ds, caltech_train_indices)
 caltech101_test = torch.utils.data.Subset(caltech101ds, caltech_test_indices)
+# CIFAR-10 DATASET
+PATH_CIFAR10 = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\cifar-10\\train"
 
-oxford5k_train = torch.utils.data.Subset(oxford5kds, oxford_train_indices)
-oxford5k_test = torch.utils.data.Subset(oxford5kds, oxford_test_indices)
-
-corel5k_train = torch.utils.data.Subset(corel5kds, corel5k_train_indices)
-corel5k_test = torch.utils.data.Subset(corel5kds, corel5k_test_indices)
-
+cifar10ds = CifarDataset(PATH_CIFAR10, transform_img)
+cifar10_train_indices, cifar10_test_indices = train_test_split(range(len(cifar10ds)),stratify=cifar10ds.getLabels(), test_size=0.2)
 cifar10_train = torch.utils.data.Subset(cifar10ds, cifar10_train_indices)
 cifar10_test = torch.utils.data.Subset(cifar10ds, cifar10_test_indices)
+# OXFORD-102-FLOWER DATASET
+PATH_OXFORD102FLOWERS_TRAIN = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\102flowers_categorized\\dataset\\train"
+PATH_OXFORD102FLOWERS_TEST = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\102flowers_categorized\\dataset\\valid"
+oxford102flower_train = Oxford102Flower(PATH_OXFORD102FLOWERS_TRAIN, transform_img)
+oxford102flower_test = Oxford102Flower(PATH_OXFORD102FLOWERS_TEST, transform_img)
 
-inriaHoliday_train = torch.utils.data.Subset(inriaHolidayds, inriaHoliday_train_indices)
-inriaHoliday_test = torch.utils.data.Subset(inriaHolidayds, inriaHoliday_test_indices)
+# NUS-WIDE DATASET
+
+# MS-COCO 2017 DATASET
+dataDir = 'D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\coco2017'
+
+dataType_val = 'val2017'
+dataType_train = 'train2017'
+
+annFile_train = f'{dataDir}/annotations/instances_{dataType_train}.json'
+annFile_val = f'{dataDir}/annotations/instances_{dataType_val}.json'
+
+coco_train = CustomCocoDataset(root=f'{dataDir}/{dataType_train}', annFile=annFile_train, transform=transform_img)
+coco_val = CustomCocoDataset(root=f'{dataDir}/{dataType_val}', annFile=annFile_val, transform=transform_img)
+
+# =============================================================================================
+# oxford5kds = OxfordDataset(PATH_OXFORD5K, transform_img)
+# corel5kds = CorelDataset(PATH_COREL5K, transform_img)
+# inriaHolidayds = InriaHolidayDataset(PATH_HOLIDAY, transform_img)
+
+# oxford_train_indices, oxford_test_indices = train_test_split(range(len(oxford5kds)),stratify=oxford5kds.getLabels(), test_size=0.2)
+# corel5k_train_indices, corel5k_test_indices = train_test_split(range(len(corel5kds)),stratify=corel5kds.getLabels(), test_size=0.2)
+# inriaHoliday_train_indices, inriaHoliday_test_indices = train_test_split(range(len(inriaHolidayds)), shuffle=True, test_size=0.2)
+
+# oxford5k_train = torch.utils.data.Subset(oxford5kds, oxford_train_indices)
+# oxford5k_test = torch.utils.data.Subset(oxford5kds, oxford_test_indices)
+
+# corel5k_train = torch.utils.data.Subset(corel5kds, corel5k_train_indices)
+# corel5k_test = torch.utils.data.Subset(corel5kds, corel5k_test_indices)
+
+# inriaHoliday_train = torch.utils.data.Subset(inriaHolidayds, inriaHoliday_train_indices)
+# inriaHoliday_test = torch.utils.data.Subset(inriaHolidayds, inriaHoliday_test_indices)
 
 ############################################################################################
 ################################# CUSTOM DATALOADER ########################################
@@ -90,56 +111,62 @@ inriaHoliday_test = torch.utils.data.Subset(inriaHolidayds, inriaHoliday_test_in
 
 mydataloader = [
     [DataLoader(caltech101_train, batch_size=1), DataLoader(caltech101_test, batch_size=1)],
+    [DataLoader(cifar10_train, batch_size=1), DataLoader(cifar10_test, batch_size=1)],
+    [DataLoader(oxford102flower_train, batch_size=1), DataLoader(oxford102flower_test, batch_size=1)],
+    [DataLoader(coco_train, batch_size=1), DataLoader(coco_val, batch_size=1)],
     # [flickr30k_trainloader, flickr30k_testloader],
     # [caltech101_trainloader, caltech101_testloader],
-    [DataLoader(cifar10_train, batch_size=1), DataLoader(cifar10_test, batch_size=1)],
     # [cifar_trainloader, cifar_testloader],
-    [DataLoader(oxford5k_train, batch_size=1), DataLoader(oxford5k_test, batch_size=1)],
-    [DataLoader(corel5k_train, batch_size=1), DataLoader(corel5k_test, batch_size=1)],
-    
-    [DataLoader(inriaHoliday_train, batch_size=1), DataLoader(inriaHoliday_test, batch_size=1)]
+    # [DataLoader(oxford5k_train, batch_size=1), DataLoader(oxford5k_test, batch_size=1)],
+    # [DataLoader(corel5k_train, batch_size=1), DataLoader(corel5k_test, batch_size=1)],
+    # [DataLoader(inriaHoliday_train, batch_size=1), DataLoader(inriaHoliday_test, batch_size=1)]
 ]
 BackBoneInstance = [
     Resnet18_custom_best(),
+    Resnet50Descriptor(), 
     MobileNetV3Feature(),
-    MobileNetV3Feature_large(),
-    tinyvit(),
-    tinyvit_small(),
-    MyEfficientViT()
+    MobileNetV3Feature_large() #,
+    # tinyvit(),
+    # tinyvit_small(),
+    # MyEfficientViT()
 ]
 IndexingInstance = [
-    FaissRawIndex(512),
-    FaissLSHIndex(512, 128),
-    FaissLSHIndex(576, 128),
-    FaissLSHIndex(960, 128),
-    AnnoyLSHIndex(512),
-    AnnoyLSHIndex(576,100),
-    FaissRawIndex(576),
-    FaissRawIndex(320),
-    FaissRawIndex(192)
-
+    #resnet18
+    FaissRawIndex(512),#0---------
+    FaissLSHIndex(512, 128),#1
+    AnnoyLSHIndex(512),#2
+    #resnet50
+    FaissRawIndex(2048), #3--------
+    #mobilenetv3_small
+    FaissRawIndex(576),#4----------
+    FaissLSHIndex(576, 128),#5
+    AnnoyLSHIndex(576, 100),#6
+    #mobilenetv3_large
+    FaissRawIndex(960),#7----------
+    FaissLSHIndex(960, 128),#8
 ]
 metadata_info = [
-    [["caltech101", "best_resnet18_faisslsh"],
-     ["caltech101", "MobileNetV3_small_custom_faisslsh"],
-     ["caltech101", "MobileNetV3_large_faisslsh"],
-     ["caltech101", "tinyViT_raw"],
-     ["caltech101", "TinyViT_small_RawIndex"],
-     ["caltech101", "EfficientViT-M0_RawIndex"]],
-    [["cifar10", "best_resnet18_faisslsh"],
-     ["cifar10", "MobileNetV3_small_custom_faisslsh"],
-     ["cifar10", "MobileNetV3_large_faisslsh"]],
-    [["oxford5k", "best_resnet18_faisslsh"],
-     ["oxford5k", "MobileNetV3_small_custom_faisslsh"],
-     ["oxford5k", "MobileNetV3_large_faisslsh"]],
-    [["corel5k", "best_resnet18_faisslsh"],
-     ["corel5k", "MobileNetV3_small_custom_faisslsh"],
-     ["corel5k", "MobileNetV3_large_faisslsh"]],
-    [["INRIA_Holiday", "best_resnet18_faisslsh"],
-     ["INRIA_Holiday", "MobileNetV3_small_custom_faisslsh"],
-     ["INRIA_Holiday", "MobileNetV3_large_faisslsh"],
-     ["INRIA_Holiday", "TinyViT_small_RawIndex"],
-     ["INRIA_Holiday", "EfficientViT-M0_RawIndex"]]   
+    [["caltech101", "best_resnet18_RawIndex"],
+     ["caltech101", "resnet50_RawIndex"],
+     ["caltech101", "MobileNetV3_small_custom_RawIndex"],
+     ["caltech101", "MobileNetV3_large_RawIndex"]],
+    [["cifar10", "best_resnet18_RawIndex"],
+     ["cifar10", "resnet50_RawIndex"],
+     ["cifar10", "MobileNetV3_small_custom_RawIndex"],
+     ["cifar10", "MobileNetV3_large_RawIndex"]],
+    [["oxford102flower", "best_resnet18_RawIndex"],
+     ["oxford102flower", "resnet50_RawIndex"],
+     ["oxford102flower", "MobileNetV3_small_custom_RawIndex"],
+     ["oxford102flower", "MobileNetV3_large_RawIndex"]],
+    [["coco-2017", "best_resnet18_RawIndex"],
+     ["coco-2017", "resnet50_RawIndex"],
+     ["coco-2017", "MobileNetV3_small_custom_RawIndex"],
+     ["coco-2017", "MobileNetV3_large_RawIndex"]],
+    # [["INRIA_Holiday", "best_resnet18_faisslsh"],
+    #  ["INRIA_Holiday", "MobileNetV3_small_custom_faisslsh"],
+    #  ["INRIA_Holiday", "MobileNetV3_large_faisslsh"],
+    #  ["INRIA_Holiday", "TinyViT_small_RawIndex"],
+    #  ["INRIA_Holiday", "EfficientViT-M0_RawIndex"]]   
 ]
 
 ############################################################################################
@@ -149,51 +176,44 @@ head_output = None
 
 TestSearch = [
     [
-        CBIR(BackBoneInstance[5], IndexingInstance[8], metadata=metadata_info[0][5], evalmode=False),
-        CBIR(BackBoneInstance[4], IndexingInstance[7], metadata=metadata_info[0][4], evalmode=False),
-        CBIR(BackBoneInstance[3], IndexingInstance[6], metadata=metadata_info[0][3], evalmode=False),
-        CBIR(BackBoneInstance[0], IndexingInstance[1], metadata=metadata_info[0][0], evalmode=False),
-        CBIR(BackBoneInstance[1], IndexingInstance[2], metadata=metadata_info[0][1], evalmode=False),
-        CBIR(BackBoneInstance[2], IndexingInstance[3], metadata=metadata_info[0][2], evalmode=False)    
+        CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[0][0]),
+        CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[0][1]),
+        CBIR(BackBoneInstance[2], IndexingInstance[4], metadata=metadata_info[0][2]),
+        CBIR(BackBoneInstance[3], IndexingInstance[7], metadata=metadata_info[0][3]),
+          
     ],
     [
-        CBIR(BackBoneInstance[0], IndexingInstance[1], metadata=metadata_info[1][0], transfer_index = False, evalmode=False),
-        CBIR(BackBoneInstance[1], IndexingInstance[2], metadata=metadata_info[1][1], evalmode=False),
-        CBIR(BackBoneInstance[2], IndexingInstance[3], metadata=metadata_info[1][2], evalmode=False)    
+        CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[1][0]),
+        CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[1][1]),
+        CBIR(BackBoneInstance[2], IndexingInstance[4], metadata=metadata_info[1][2]),
+        CBIR(BackBoneInstance[3], IndexingInstance[7], metadata=metadata_info[1][3]),   
     ],
     [
-        CBIR(BackBoneInstance[0], IndexingInstance[1], metadata=metadata_info[2][0]),
-        CBIR(BackBoneInstance[1], IndexingInstance[2], metadata=metadata_info[2][1]),
-        CBIR(BackBoneInstance[2], IndexingInstance[3], metadata=metadata_info[2][2])    
+        CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[2][0]),
+        CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[2][1]),
+        CBIR(BackBoneInstance[2], IndexingInstance[4], metadata=metadata_info[2][2]),
+        CBIR(BackBoneInstance[3], IndexingInstance[7], metadata=metadata_info[2][3]),   
     ],
     [
-        CBIR(BackBoneInstance[0], IndexingInstance[1], metadata=metadata_info[3][0]),
-        CBIR(BackBoneInstance[1], IndexingInstance[2], metadata=metadata_info[3][1]),
-        CBIR(BackBoneInstance[2], IndexingInstance[3], metadata=metadata_info[3][2])    
+        CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[3][0]),
+        CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[3][1]),
+        CBIR(BackBoneInstance[2], IndexingInstance[4], metadata=metadata_info[3][2]),
+        CBIR(BackBoneInstance[3], IndexingInstance[7], metadata=metadata_info[3][3]),  
     ],
-    [
-        CBIR(BackBoneInstance[5], IndexingInstance[8], metadata=metadata_info[4][4], evalmode=False),
-        CBIR(BackBoneInstance[4], IndexingInstance[7], metadata=metadata_info[4][3], evalmode=False),
-        CBIR(BackBoneInstance[0], IndexingInstance[1], metadata=metadata_info[4][0]),
-        CBIR(BackBoneInstance[1], IndexingInstance[2], metadata=metadata_info[4][1]),
-        CBIR(BackBoneInstance[2], IndexingInstance[3], metadata=metadata_info[4][2])    
-    ]
     
 ]
 
 ############################################################################################
 ################################# PERFORM INDEXING AND RETRIEVING ##########################
 ############################################################################################
-perform_index = [[True, False, False, False, False, False], 
-                 [False, False, False], 
-                 [False, False, False], 
-                 [False, False, False], 
-                 [True, True, False, False, False]]
-perform_eval =  [[True, False, False, False, False, False], 
-                 [False, False, False], 
-                 [False, False, False], 
-                 [False, False, False], 
-                 [True, True, False, False, False]]
+perform_index = [[False, False, False, False], 
+                 [False, False, False, False], 
+                 [False, False, False, False], 
+                 [True, False, True, False]]
+perform_eval =  [[False, False, False, False], 
+                 [False, False, False, False], 
+                 [False, False, False, False], 
+                 [True, False, True, False]]
 k_top = [5,7,9,11]
 
 for idx_db in range(0, len(TestSearch), 1):

@@ -118,9 +118,11 @@ class CBIR:
             curr_AP = AP(real_label, retrieved_labels, k_top)
             sumAP = sumAP + curr_AP
         end_time = time.time()
-        print("mAP =", sumAP/num_query, "(on", num_query, "queries)")
-        print("total query time:", (end_time-start_time), "s", "(", (end_time-start_time) * 10**3/num_query, "ms each query)")
-        
+        if num_query == 0: print("No query image found!")
+        else:
+            print("mAP =", sumAP/num_query, "(on", num_query, "queries)")
+            print("total query time:", (end_time-start_time), "s", "(", (end_time-start_time) * 10**3/num_query, "ms each query)")
+            
 ############# IMAGE RETRIEVAL FOR 192FLOWER DATASET #############################
 class FlowerImageSearch:
     def __init__(self, model, index_size, metadata) -> None:

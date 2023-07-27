@@ -13,6 +13,8 @@ import pandas as pd
 from imutils import paths
 import tqdm
 
+# from source.data_handler import MyTransform
+
 #from source.data_handler import MyTransform
 
 
@@ -86,6 +88,34 @@ class MyTransform:
 ################################################################################
 
 #------------------------------------------------------
+from pycocotools.coco import COCO
+
+
+class CustomCocoDataset(Dataset):
+    def __init__(self, root, annFile, transform : MyTransform):
+        self.root = root
+        self.coco = COCO(annFile)
+        self.ids = list(sorted(self.coco.imgs.keys()))
+        self.transform = transform
+
+    def __getitem__(self, index):
+        coco = self.coco
+        img_id = self.ids[index]
+        ann_ids = coco.getAnnIds(imgIds=img_id)
+        anns = coco.loadAnns(ann_ids)
+        cat_ids = [ann['category_id'] for ann in anns]
+        cats = coco.loadCats(cat_ids)
+        cat_names = [cat['name'] for cat in cats]
+
+        path = coco.loadImgs(img_id)[0]['file_name']
+        img_path = f'{self.root}/{path}'
+        img = Image.open(img_path).convert('RGB')
+        img = self.transform.process(img)
+
+        return img, cat_names, img_path
+
+    def __len__(self):
+        return len(self.ids)
 
 #-----------------------------------------------------
 
@@ -115,6 +145,17 @@ class CaltechDataset(CustomDataset):
     def __init__(self, datasetpath, transform) -> None:
         super().__init__(transform)
         
+        for obj_name in os.listdir(datasetpath):
+            curr_path = os.path.join(datasetpath, obj_name)
+            if os.path.isdir(curr_path):
+                for filename in os.listdir(curr_path):
+                    self.imgpath.append(os.path.join(curr_path, filename))
+                    self.labels.append(obj_name)
+
+class Oxford102Flower(CustomDataset):
+    def __init__(self, datasetpath, transform: MyTransform) -> None:
+        super().__init__(transform)
+
         for obj_name in os.listdir(datasetpath):
             curr_path = os.path.join(datasetpath, obj_name)
             if os.path.isdir(curr_path):

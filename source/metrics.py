@@ -1,7 +1,12 @@
 
 
 def Similarity(true_label, predicted_label):
-    pass
+    n_same = 0
+    for sub_pred_label in predicted_label:
+        for sub_true_label in true_label:
+            if sub_pred_label == sub_true_label: n_same = n_same + 1
+    if n_same >= 1: return True
+    return False
 
 def precisionAtk(ground_true, retrieved, k)->float:
     if k == 0: 
@@ -9,7 +14,7 @@ def precisionAtk(ground_true, retrieved, k)->float:
         return 0
     relevant = 0
     for item in retrieved[:k]:
-        if ground_true == item: relevant = relevant + 1
+        if Similarity(ground_true, item): relevant = relevant + 1
         # print("compare two label: ", ground_true, "[", ground_true == item, "]", item)
     return float(relevant)/k
 def AP(ground_true, retrieved, k_top)->float:
@@ -17,7 +22,7 @@ def AP(ground_true, retrieved, k_top)->float:
     sum_precision = 0
     n_relevant = 0
     for item in retrieved:
-        if ground_true == item: n_relevant = n_relevant + 1
+        if Similarity(ground_true, item): n_relevant = n_relevant + 1
     # print("num of relevant item: ", n_relevant)
     if n_relevant == 0: return 0
     for i in range(1, k_top + 1):
