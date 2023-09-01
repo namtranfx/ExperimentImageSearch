@@ -5,6 +5,7 @@ import torch
 import numpy as np
 from skimage.feature import hog # Import Hog model to extract features
 import cv2
+from torchvision.models.feature_extraction import create_feature_extractor
 
 from source.losses import TripletLoss
 from source.data_handler import MyTransform_norm, MyTransform
@@ -58,17 +59,39 @@ class MobileNetV3Feature(FeatureDescriptor):
     def __init__(self) -> None:
         super().__init__()
         self.model = models.mobilenet_v3_small(weights=models.MobileNet_V3_Small_Weights.DEFAULT).cpu()
-        #self.model = models.mobilenet_v3_large(weights=models.MobileNet_V3_Large_Weights.DEFAULT).cpu()
-        
+        return_nodes = {
+            'flatten':'final_feature'
+        }
+        self.only_feature_model = create_feature_extractor(self.model, return_nodes=return_nodes)
         self.model = self.model.features
     def extractFeature(self, img):
-        feature = self.model(img)
-        #print("Shape of feature = ", feature.shape)
-        # return torch.flatten(feature, start_dim=1)
-        compact_f = torch.nn.AdaptiveAvgPool2d(1)(feature)
-        final_f = torch.flatten(compact_f, start_dim=1)
-        # print("[MobileNet feature]: shape of final feature = ", final_f.shape)
+        final_f = self.only_feature_model(img)['final_feature']
+        # feature = self.model(img)
+        # #print("Shape of feature = ", feature.shape)
+        # # return torch.flatten(feature, start_dim=1)
+        # compact_f = torch.nn.AdaptiveAvgPool2d(1)(feature)
+        # final_f = torch.flatten(compact_f, start_dim=1)
+        # # print("[MobileNet feature]: shape of final feature = ", final_f.shape)
         return final_f
+
+class MobileNetV3_small_composite(FeatureDescriptor):
+    def __init__(self) -> None:
+        super().__init__()
+        self.model = models.mobilenet_v3_small(weights=models.MobileNet_V3_Small_Weights.DEFAULT).cpu()
+        return_nodes = {
+            'flatten' : 'final_feature',
+            'classifier.1' : 'first_semantic',
+            'classifier.2' : 'final_semantic', 
+            'classifier.3' : 'classify_result'
+        }
+        self.only_feature_model = create_feature_extractor(self.model, return_nodes=return_nodes)
+    def extractFeature(self, img):
+        inference_result = self.only_feature_model(img)
+        final_f = inference_result['final_feature'] # shape = 576
+        first_semantic = inference_result['first_semantic'] # shape = 1024
+        final_classify = inference_result['classify_result'] # shape = 1000
+        
+        return first_semantic
 class MobileNetV3Feature_flatten(MobileNetV3Feature):
     def extractFeature(self, img):
         feature = self.model(img)
@@ -82,6 +105,10 @@ class MobileNetV3Feature_large(MobileNetV3Feature):
     def __init__(self) -> None:
         super().__init__()
         self.model = models.mobilenet_v3_large(weights=models.MobileNet_V3_Large_Weights.DEFAULT).cpu()
+        return_nodes = {
+            'flatten':'final_feature'
+        }
+        self.only_feature_model = create_feature_extractor(self.model, return_nodes=return_nodes)
         self.model = self.model.features
 class MobileNetV3Feature_large_flatten(MobileNetV3Feature_large):
     def extractFeature(self, img):

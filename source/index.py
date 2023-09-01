@@ -16,6 +16,35 @@ class MyIndex:
     def search(self, query_feature_vec, k_top):
         pass
 
+# import dependencies for this class
+from sparselsh import LSH
+from scipy.sparse import csr_matrix
+import pickle
+
+class NewLSHIndex(MyIndex):
+    def __init__(self, bitdepth, input_dim, hashtable = 1) -> None:
+        super().__init__()
+        count = 0
+        self.lsh = LSH(
+                    bitdepth,
+                    input_dim,
+                    num_hashtables=hashtable,
+                    storage_config={"dict": None}
+                )
+    
+    def add(self, feature_vec, label):
+        self.lsh.index(feature_vec, extra_data=label)
+    def saveIndex(self, path):
+        with open(path + ".pkl", "wb") as f:
+            pickle.dump(self.lsh, f)
+    def loadIndex(self, path):
+        with open(path + ".pkl", "rb") as f:
+            self.lsh = pickle.load(f)
+    def search(self, query_feature_vec, k_top):
+        points = self.lsh.query(query_feature_vec, num_results=k_top)
+        (point, label), dist = points[0:k_top - 1]
+        return label
+
 class FaissRawIndex(MyIndex):
     def __init__(self, feature_size) -> None:
         super().__init__()
@@ -28,6 +57,7 @@ class FaissRawIndex(MyIndex):
     def loadIndex(self, path):
         self._faiss_index = read_index(path)
     def add(self, feature_vec):
+        
         if self.is_finished == True:
             self._faiss_index.reset()
             self.is_finished = False

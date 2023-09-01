@@ -1,6 +1,7 @@
 import os
 import time
 
+import random
 import glob
 from tqdm import tqdm
 import faiss 
@@ -13,6 +14,43 @@ from faiss import write_index, read_index
 
 from source.metrics import AP
 from source.index import MyIndex
+
+
+
+
+def showRetrievalResult(query, query_label, result, result_label, curr_AP, id, meta):
+    """
+    Show retrieval result.
+
+    Parameters:
+        query (PIL.Image): query image
+        query_label: label of query (just in evaluation mode)
+        result: list of retrieved image file path
+        result_label: list of label of retrieved image
+    """
+    numcol = 3
+    numrow = 2
+    # Reprocessing query image (from Torch tensor to RGB array image)
+    image_np = np.array(query)
+    image_np = np.squeeze(image_np) # Remove channel has length 1
+    image_np = np.transpose(image_np, (1,2,0)) # Transpose to move color channels to the end
+    # Show retrieved result
+    fig, axs = plt.subplots(numrow, numcol)
+    fig.suptitle("Retrieval AP = " + str(curr_AP))
+    idx_img = 0
+    axs[0,0].imshow(image_np)
+    axs[0,0].set_title(query_label)
+    for i in range(numrow):
+        for j in range(numcol):
+            if (i * numcol + j) == 0: continue
+            axs[i,j].imshow(imread(result[idx_img][0]))
+            axs[i,j].set_title(result_label[idx_img][0])
+            idx_img = idx_img + 1
+    #print("Retrieved Image: {}".format(result[0]))
+    plt.savefig(".\\result\\" + meta[0] + "_by_" + meta[1] + "_with_" + str(id) + ".png")
+    plt.close()
+
+
 
 class CBIR:
     # metadata structure: [dataset_name, model_name]
@@ -76,6 +114,9 @@ class CBIR:
         if self.transfer_index == True: return None, self._labels[image_indices_retrieved]
         return self._im_indices[image_indices_retrieved], self._labels[image_indices_retrieved]
     def testRetrieval(self, img_input_path):
+        """
+        Retrieve from a folder of random images
+        """
         self.loadDB()
         # self._m_model.loadDescriptor()
         numcol = 3
@@ -100,6 +141,8 @@ class CBIR:
                 print("Retrieved Image: {}".format(result[0]))
                 plt.show()
     def evalRetrieval(self, dataloader, k_top):
+        number_demo = 5
+        list_demo = random.sample(range(1,len(dataloader.dataset)), number_demo)
         self.loadDB()
         # self._m_model.loadDescriptor()
         print("Start evaluating database", self.metadata[0], "using feature", self.metadata[1], "with k =", k_top, "...")
@@ -112,11 +155,17 @@ class CBIR:
                 retrieved_imgpath, retrieved_labels = self.retrieve(img, k_top=k_top)
             else:
                 img, real_label = batch
-                retrieved_labels = self.retrieve(img, k_top=k_top)
+                retrieved_labels = self.sretrieve(img, k_top=k_top)
+            
             num_query = num_query + 1
 
             curr_AP = AP(real_label, retrieved_labels, k_top)
             sumAP = sumAP + curr_AP
+
+            for item in list_demo:
+                if num_query == item:
+                    showRetrievalResult(img, real_label, retrieved_imgpath, retrieved_labels, curr_AP, num_query - 1, self.metadata)
+
         end_time = time.time()
         if num_query == 0: print("No query image found!")
         else:

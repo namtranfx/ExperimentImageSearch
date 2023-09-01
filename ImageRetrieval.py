@@ -61,19 +61,6 @@ coco_train = CustomCocoDataset(root=f'{dataDir}/{dataType_train}', annFile=annFi
 coco_val = CustomCocoDataset(root=f'{dataDir}/{dataType_val}', annFile=annFile_val, transform=transform_img)
 
 # =============================================================================================
-# oxford5kds = OxfordDataset(PATH_OXFORD5K, transform_img)
-# corel5kds = CorelDataset(PATH_COREL5K, transform_img)
-# inriaHolidayds = InriaHolidayDataset(PATH_HOLIDAY, transform_img)
-
-# oxford_train_indices, oxford_test_indices = train_test_split(range(len(oxford5kds)),stratify=oxford5kds.getLabels(), test_size=0.2)
-# corel5k_train_indices, corel5k_test_indices = train_test_split(range(len(corel5kds)),stratify=corel5kds.getLabels(), test_size=0.2)
-# inriaHoliday_train_indices, inriaHoliday_test_indices = train_test_split(range(len(inriaHolidayds)), shuffle=True, test_size=0.2)
-
-# oxford5k_train = torch.utils.data.Subset(oxford5kds, oxford_train_indices)
-# oxford5k_test = torch.utils.data.Subset(oxford5kds, oxford_test_indices)
-
-# corel5k_train = torch.utils.data.Subset(corel5kds, corel5k_train_indices)
-# corel5k_test = torch.utils.data.Subset(corel5kds, corel5k_test_indices)
 
 # inriaHoliday_train = torch.utils.data.Subset(inriaHolidayds, inriaHoliday_train_indices)
 # inriaHoliday_test = torch.utils.data.Subset(inriaHolidayds, inriaHoliday_test_indices)
@@ -95,7 +82,6 @@ coco_val = CustomCocoDataset(root=f'{dataDir}/{dataType_val}', annFile=annFile_v
 #-----------------------------------------------
 
 # caltech101 = torchvision.datasets.Caltech101(root='./data', download=True, transform=transform)
-
 # caltech101train, caltech101test = torch.utils.data.random_split(caltech101, [int(len(caltech101)*0.8), len(caltech101) - int(len(caltech101)*0.8)])
 # caltech101_trainloader = torch.utils.data.DataLoader(caltech101train, batch_size=1)#, shuffle=True, num_workers=2)
 # caltech101_testloader = torch.utils.data.DataLoader(caltech101test, batch_size=1)#, shuffle=False, num_workers=2)
@@ -124,7 +110,7 @@ mydataloader = [
 BackBoneInstance = [
     Resnet18_custom_best(),
     Resnet50Descriptor(), 
-    MobileNetV3Feature(),
+    MobileNetV3_small_composite(),
     MobileNetV3Feature_large() #,
     # tinyvit(),
     # tinyvit_small(),
@@ -137,31 +123,49 @@ IndexingInstance = [
     AnnoyLSHIndex(512),#2
     #resnet50
     FaissRawIndex(2048), #3--------
+    FaissLSHIndex(2048, 128), #4
     #mobilenetv3_small
-    FaissRawIndex(576),#4----------
-    FaissLSHIndex(576, 128),#5
-    AnnoyLSHIndex(576, 100),#6
+    FaissRawIndex(576),#5----------
+    FaissLSHIndex(576, 128),#6
+    AnnoyLSHIndex(576, 100),#7
     #mobilenetv3_large
-    FaissRawIndex(960),#7----------
-    FaissLSHIndex(960, 128),#8
+    FaissRawIndex(960),#8----------
+    FaissLSHIndex(960, 128),#9
 ]
+
 metadata_info = [
     [["caltech101", "best_resnet18_RawIndex"],
      ["caltech101", "resnet50_RawIndex"],
      ["caltech101", "MobileNetV3_small_custom_RawIndex"],
-     ["caltech101", "MobileNetV3_large_RawIndex"]],
+     ["caltech101", "MobileNetV3_large_RawIndex"],
+     ["caltech101", "best_resnet18_LSHIndex"],
+     ["caltech101", "resnet50_LSHIndex"],
+     ["caltech101", "MobileNetV3_small_custom_LSHIndex"],
+     ["caltech101", "MobileNetV3_large_LSHIndex"]],
     [["cifar10", "best_resnet18_RawIndex"],
      ["cifar10", "resnet50_RawIndex"],
      ["cifar10", "MobileNetV3_small_custom_RawIndex"],
-     ["cifar10", "MobileNetV3_large_RawIndex"]],
+     ["cifar10", "MobileNetV3_large_RawIndex"],
+     ["cifar10", "best_resnet18_LSHIndex"],
+     ["cifar10", "resnet50_LSHIndex"],
+     ["cifar10", "MobileNetV3_small_custom_LSHIndex"],
+     ["cifar10", "MobileNetV3_large_LSHIndex"]],
     [["oxford102flower", "best_resnet18_RawIndex"],
      ["oxford102flower", "resnet50_RawIndex"],
      ["oxford102flower", "MobileNetV3_small_custom_RawIndex"],
-     ["oxford102flower", "MobileNetV3_large_RawIndex"]],
+     ["oxford102flower", "MobileNetV3_large_RawIndex"],
+     ["oxford102flower", "best_resnet18_LSHIndex"],
+     ["oxford102flower", "resnet50_LSHIndex"],
+     ["oxford102flower", "MobileNetV3_small_custom_LSHIndex"],
+     ["oxford102flower", "MobileNetV3_large_LSHIndex"]],
     [["coco-2017", "best_resnet18_RawIndex"],
      ["coco-2017", "resnet50_RawIndex"],
      ["coco-2017", "MobileNetV3_small_custom_RawIndex"],
-     ["coco-2017", "MobileNetV3_large_RawIndex"]],
+     ["coco-2017", "MobileNetV3_large_RawIndex"],
+     ["coco-2017", "best_resnet18_LSHIndex"],
+     ["coco-2017", "resnet50_LSHIndex"],
+     ["coco-2017", "MobileNetV3_small_custom_LSHIndex"],
+     ["coco-2017", "MobileNetV3_large_LSHIndex"]],
     # [["INRIA_Holiday", "best_resnet18_faisslsh"],
     #  ["INRIA_Holiday", "MobileNetV3_small_custom_faisslsh"],
     #  ["INRIA_Holiday", "MobileNetV3_large_faisslsh"],
@@ -173,51 +177,412 @@ metadata_info = [
 ################################# CBIR INSTANCE ############################################
 ############################################################################################
 head_output = None
+# RawIndex id: 0, 3, 5, 8
+# TestSearch = [
+#     [
+#         CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[0][0]),
+#         CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[0][1]),
+#         CBIR(BackBoneInstance[2], IndexingInstance[5], metadata=metadata_info[0][2]),
+#         CBIR(BackBoneInstance[3], IndexingInstance[8], metadata=metadata_info[0][3]),
+          
+#     ],
+#     [
+#         CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[1][0]),
+#         CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[1][1]),
+#         CBIR(BackBoneInstance[2], IndexingInstance[5], metadata=metadata_info[1][2]),
+#         CBIR(BackBoneInstance[3], IndexingInstance[8], metadata=metadata_info[1][3]),   
+#     ],
+#     [
+#         CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[2][0]),
+#         CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[2][1]),
+#         CBIR(BackBoneInstance[2], IndexingInstance[5], metadata=metadata_info[2][2]),
+#         CBIR(BackBoneInstance[3], IndexingInstance[8], metadata=metadata_info[2][3]),   
+#     ],
+#     [
+#         CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[3][0]),
+#         CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[3][1]),
+#         CBIR(BackBoneInstance[2], IndexingInstance[5], metadata=metadata_info[3][2]),
+#         CBIR(BackBoneInstance[3], IndexingInstance[8], metadata=metadata_info[3][3]),  
+#     ],
+    
+# ]
+# LSHIndex id: 1, 4, 6, 9
+# TestSearch = [
+#     [
+#         CBIR(BackBoneInstance[0], IndexingInstance[1], metadata=metadata_info[0][4]),
+#         CBIR(BackBoneInstance[1], IndexingInstance[4], metadata=metadata_info[0][5]),
+#         CBIR(BackBoneInstance[2], IndexingInstance[6], metadata=metadata_info[0][6]),
+#         CBIR(BackBoneInstance[3], IndexingInstance[9], metadata=metadata_info[0][7]),
+          
+#     ],
+#     [
+#         CBIR(BackBoneInstance[0], IndexingInstance[1], metadata=metadata_info[1][4]),
+#         CBIR(BackBoneInstance[1], IndexingInstance[4], metadata=metadata_info[1][5]),
+#         CBIR(BackBoneInstance[2], IndexingInstance[6], metadata=metadata_info[1][6]),
+#         CBIR(BackBoneInstance[3], IndexingInstance[9], metadata=metadata_info[1][7]),   
+#     ],
+#     [
+#         CBIR(BackBoneInstance[0], IndexingInstance[1], metadata=metadata_info[2][4]),
+#         CBIR(BackBoneInstance[1], IndexingInstance[4], metadata=metadata_info[2][5]),
+#         CBIR(BackBoneInstance[2], IndexingInstance[6], metadata=metadata_info[2][6]),
+#         CBIR(BackBoneInstance[3], IndexingInstance[9], metadata=metadata_info[2][7]),   
+#     ],
+#     [
+#         CBIR(BackBoneInstance[0], IndexingInstance[1], metadata=metadata_info[3][4]),
+#         CBIR(BackBoneInstance[1], IndexingInstance[4], metadata=metadata_info[3][5]),
+#         CBIR(BackBoneInstance[2], IndexingInstance[6], metadata=metadata_info[3][6]),
+#         CBIR(BackBoneInstance[3], IndexingInstance[9], metadata=metadata_info[3][7]),  
+#     ],
+    
+# ]
+
+# LSH TESTING AREA ============================================================================
+LSH_index_instance = [
+    [FaissLSHIndex(512, 16),
+    FaissLSHIndex(512, 32),
+    FaissLSHIndex(512, 64),
+    FaissLSHIndex(512, 128),
+    FaissLSHIndex(512, 256),
+    FaissLSHIndex(512, 512),
+    FaissLSHIndex(512, 1024),
+    FaissLSHIndex(512, 2048)],
+    [FaissLSHIndex(2048, 16),
+    FaissLSHIndex(2048, 32),
+    FaissLSHIndex(2048, 64),
+    FaissLSHIndex(2048, 128),
+    FaissLSHIndex(2048, 256),
+    FaissLSHIndex(2048, 512),
+    FaissLSHIndex(2048, 1024),
+    FaissLSHIndex(2048, 2048)],
+    [FaissLSHIndex(1024, 16),
+    FaissLSHIndex(1024, 32),
+    FaissLSHIndex(1024, 64),
+    FaissLSHIndex(1024, 128),
+    FaissLSHIndex(1024, 256),
+    FaissLSHIndex(1024, 512),
+    FaissLSHIndex(1024, 1024),
+    FaissLSHIndex(1024, 2048)],
+    [FaissLSHIndex(960, 16),
+    FaissLSHIndex(960, 32),
+    FaissLSHIndex(960, 64),
+    FaissLSHIndex(960, 128),
+    FaissLSHIndex(960, 256),
+    FaissLSHIndex(960, 512),
+    FaissLSHIndex(960, 1024),
+    FaissLSHIndex(960, 2048)]
+
+]
+
+LSH_metadata = [
+    # caltech101
+    [
+    [["caltech101", "resnet18_LSH_16_bits"],
+    ["caltech101", "resnet18_LSH_32_bits"],
+    ["caltech101", "resnet18_LSH_64_bits"],
+    ["caltech101", "resnet18_LSH_128_bits"],
+    ["caltech101", "resnet18_LSH_256_bits"],
+    ["caltech101", "resnet18_LSH_512_bits"],
+    ["caltech101", "resnet18_LSH_1024_bits"],
+    ["caltech101", "resnet18_LSH_2048_bits"]],
+    [["caltech101", "resnet50_LSH_16_bits"],
+    ["caltech101", "resnet50_LSH_32_bits"],
+    ["caltech101", "resnet50_LSH_64_bits"],
+    ["caltech101", "resnet50_LSH_128_bits"],
+    ["caltech101", "resnet50_LSH_256_bits"],
+    ["caltech101", "resnet50_LSH_512_bits"],
+    ["caltech101", "resnet50_LSH_1024_bits"],
+    ["caltech101", "resnet50_LSH_2048_bits"]],
+    [["caltech101", "mobile_LSH_16_bits"],
+    ["caltech101", "mobile_LSH_32_bits"],
+    ["caltech101", "mobile_LSH_64_bits"],
+    ["caltech101", "mobile_LSH_128_bits"],
+    ["caltech101", "mobile_LSH_256_bits"],
+    ["caltech101", "mobile_LSH_512_bits"],
+    ["caltech101", "mobile_LSH_1024_bits"],
+    ["caltech101", "mobile_LSH_2048_bits"]],
+    [["caltech101", "mobile2_LSH_16_bits"],
+    ["caltech101", "mobile2_LSH_32_bits"],
+    ["caltech101", "mobile2_LSH_64_bits"],
+    ["caltech101", "mobile2_LSH_128_bits"],
+    ["caltech101", "mobile2_LSH_256_bits"],
+    ["caltech101", "mobile2_LSH_512_bits"],
+    ["caltech101", "mobile2_LSH_1024_bits"],
+    ["caltech101", "mobile2_LSH_2048_bits"]]
+
+    ],
+    # cifar10
+    [
+    [["cifar10", "resnet18_LSH_16_bits"],
+    ["cifar10", "resnet18_LSH_32_bits"],
+    ["cifar10", "resnet18_LSH_64_bits"],
+    ["cifar10", "resnet18_LSH_128_bits"],
+    ["cifar10", "resnet18_LSH_256_bits"],
+    ["cifar10", "resnet18_LSH_512_bits"],
+    ["cifar10", "resnet18_LSH_1024_bits"],
+    ["cifar10", "resnet18_LSH_2048_bits"]],
+    [["cifar10", "resnet50_LSH_16_bits"],
+    ["cifar10", "resnet50_LSH_32_bits"],
+    ["cifar10", "resnet50_LSH_64_bits"],
+    ["cifar10", "resnet50_LSH_128_bits"],
+    ["cifar10", "resnet50_LSH_256_bits"],
+    ["cifar10", "resnet50_LSH_512_bits"],
+    ["cifar10", "resnet50_LSH_1024_bits"],
+    ["cifar10", "resnet50_LSH_2048_bits"]],
+    [["cifar10", "mobile_LSH_16_bits"],
+    ["cifar10", "mobile_LSH_32_bits"],
+    ["cifar10", "mobile_LSH_64_bits"],
+    ["cifar10", "mobile_LSH_128_bits"],
+    ["cifar10", "mobile_LSH_256_bits"],
+    ["cifar10", "mobile_LSH_512_bits"],
+    ["cifar10", "mobile_LSH_1024_bits"],
+    ["cifar10", "mobile_LSH_2048_bits"]],
+    [["cifar10", "mobile2_LSH_16_bits"],
+    ["cifar10", "mobile2_LSH_32_bits"],
+    ["cifar10", "mobile2_LSH_64_bits"],
+    ["cifar10", "mobile2_LSH_128_bits"],
+    ["cifar10", "mobile2_LSH_256_bits"],
+    ["cifar10", "mobile2_LSH_512_bits"],
+    ["cifar10", "mobile2_LSH_1024_bits"],
+    ["cifar10", "mobile2_LSH_2048_bits"]]
+
+    ],
+    # 102flowers
+    [
+    [["102flower", "resnet18_LSH_16_bits"],
+    ["102flower", "resnet18_LSH_32_bits"],
+    ["102flower", "resnet18_LSH_64_bits"],
+    ["102flower", "resnet18_LSH_128_bits"],
+    ["102flower", "resnet18_LSH_256_bits"],
+    ["102flower", "resnet18_LSH_512_bits"],
+    ["102flower", "resnet18_LSH_1024_bits"],
+    ["102flower", "resnet18_LSH_2048_bits"]],
+    [["102flower", "resnet50_LSH_16_bits"],
+    ["102flower", "resnet50_LSH_32_bits"],
+    ["102flower", "resnet50_LSH_64_bits"],
+    ["102flower", "resnet50_LSH_128_bits"],
+    ["102flower", "resnet50_LSH_256_bits"],
+    ["102flower", "resnet50_LSH_512_bits"],
+    ["102flower", "resnet50_LSH_1024_bits"],
+    ["102flower", "resnet50_LSH_2048_bits"]],
+    [["102flower", "mobile_LSH_16_bits"],
+    ["102flower", "mobile_LSH_32_bits"],
+    ["102flower", "mobile_LSH_64_bits"],
+    ["102flower", "mobile_LSH_128_bits"],
+    ["102flower", "mobile_LSH_256_bits"],
+    ["102flower", "mobile_LSH_512_bits"],
+    ["102flower", "mobile_LSH_1024_bits"],
+    ["102flower", "mobile_LSH_2048_bits"]],
+    [["102flower", "mobile2_LSH_16_bits"],
+    ["102flower", "mobile2_LSH_32_bits"],
+    ["102flower", "mobile2_LSH_64_bits"],
+    ["102flower", "mobile2_LSH_128_bits"],
+    ["102flower", "mobile2_LSH_256_bits"],
+    ["102flower", "mobile2_LSH_512_bits"],
+    ["102flower", "mobile2_LSH_1024_bits"],
+    ["102flower", "mobile2_LSH_2048_bits"]]
+    ],
+    # Coco2017
+    [
+   [["coco2017", "resnet18_LSH_16_bits"],
+    ["coco2017", "resnet18_LSH_32_bits"],
+    ["coco2017", "resnet18_LSH_64_bits"],
+    ["coco2017", "resnet18_LSH_128_bits"],
+    ["coco2017", "resnet18_LSH_256_bits"],
+    ["coco2017", "resnet18_LSH_512_bits"],
+    ["coco2017", "resnet18_LSH_1024_bits"],
+    ["coco2017", "resnet18_LSH_2048_bits"]],
+    [["coco2017", "resnet50_LSH_16_bits"],
+    ["coco2017", "resnet50_LSH_32_bits"],
+    ["coco2017", "resnet50_LSH_64_bits"],
+    ["coco2017", "resnet50_LSH_128_bits"],
+    ["coco2017", "resnet50_LSH_256_bits"],
+    ["coco2017", "resnet50_LSH_512_bits"],
+    ["coco2017", "resnet50_LSH_1024_bits"],
+    ["coco2017", "resnet50_LSH_2048_bits"]],
+    [["coco2017", "mobile_LSH_16_bits"],
+    ["coco2017", "mobile_LSH_32_bits"],
+    ["coco2017", "mobile_LSH_64_bits"],
+    ["coco2017", "mobile_LSH_128_bits"],
+    ["coco2017", "mobile_LSH_256_bits"],
+    ["coco2017", "mobile_LSH_512_bits"],
+    ["coco2017", "mobile_LSH_1024_bits"],
+    ["coco2017", "mobile_LSH_2048_bits"]],
+    [["coco2017", "mobile2_LSH_16_bits"],
+    ["coco2017", "mobile2_LSH_32_bits"],
+    ["coco2017", "mobile2_LSH_64_bits"],
+    ["coco2017", "mobile2_LSH_128_bits"],
+    ["coco2017", "mobile2_LSH_256_bits"],
+    ["coco2017", "mobile2_LSH_512_bits"],
+    ["coco2017", "mobile2_LSH_1024_bits"],
+    ["coco2017", "mobile2_LSH_2048_bits"]]
+    ]
+
+]
 
 TestSearch = [
     [
-        CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[0][0]),
-        CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[0][1]),
-        CBIR(BackBoneInstance[2], IndexingInstance[4], metadata=metadata_info[0][2]),
-        CBIR(BackBoneInstance[3], IndexingInstance[7], metadata=metadata_info[0][3]),
-          
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][0], metadata=LSH_metadata[0][0][0]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][1], metadata=LSH_metadata[0][0][1]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][2], metadata=LSH_metadata[0][0][2]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][3], metadata=LSH_metadata[0][0][3]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][4], metadata=LSH_metadata[0][0][4]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][5], metadata=LSH_metadata[0][0][5]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][6], metadata=LSH_metadata[0][0][6]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][7], metadata=LSH_metadata[0][0][7]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][0], metadata=LSH_metadata[0][1][0]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][1], metadata=LSH_metadata[0][1][1]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][2], metadata=LSH_metadata[0][1][2]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][3], metadata=LSH_metadata[0][1][3]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][4], metadata=LSH_metadata[0][1][4]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][5], metadata=LSH_metadata[0][1][5]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][6], metadata=LSH_metadata[0][1][6]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][7], metadata=LSH_metadata[0][1][7]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][0], metadata=LSH_metadata[0][2][0]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][1], metadata=LSH_metadata[0][2][1]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][2], metadata=LSH_metadata[0][2][2]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][3], metadata=LSH_metadata[0][2][3]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][4], metadata=LSH_metadata[0][2][4]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][5], metadata=LSH_metadata[0][2][5]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][6], metadata=LSH_metadata[0][2][6]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][7], metadata=LSH_metadata[0][2][7]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][0], metadata=LSH_metadata[0][3][0]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][1], metadata=LSH_metadata[0][3][1]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][2], metadata=LSH_metadata[0][3][2]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][3], metadata=LSH_metadata[0][3][3]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][4], metadata=LSH_metadata[0][3][4]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][5], metadata=LSH_metadata[0][3][5]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][6], metadata=LSH_metadata[0][3][6]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][7], metadata=LSH_metadata[0][3][7])
+        
     ],
     [
-        CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[1][0]),
-        CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[1][1]),
-        CBIR(BackBoneInstance[2], IndexingInstance[4], metadata=metadata_info[1][2]),
-        CBIR(BackBoneInstance[3], IndexingInstance[7], metadata=metadata_info[1][3]),   
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][0], metadata=LSH_metadata[1][0][0]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][1], metadata=LSH_metadata[1][0][1]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][2], metadata=LSH_metadata[1][0][2]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][3], metadata=LSH_metadata[1][0][3]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][4], metadata=LSH_metadata[1][0][4]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][5], metadata=LSH_metadata[1][0][5]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][6], metadata=LSH_metadata[1][0][6]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][7], metadata=LSH_metadata[1][0][7]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][0], metadata=LSH_metadata[1][1][0]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][1], metadata=LSH_metadata[1][1][1]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][2], metadata=LSH_metadata[1][1][2]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][3], metadata=LSH_metadata[1][1][3]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][4], metadata=LSH_metadata[1][1][4]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][5], metadata=LSH_metadata[1][1][5]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][6], metadata=LSH_metadata[1][1][6]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][7], metadata=LSH_metadata[1][1][7]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][0], metadata=LSH_metadata[1][2][0]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][1], metadata=LSH_metadata[1][2][1]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][2], metadata=LSH_metadata[1][2][2]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][3], metadata=LSH_metadata[1][2][3]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][4], metadata=LSH_metadata[1][2][4]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][5], metadata=LSH_metadata[1][2][5]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][6], metadata=LSH_metadata[1][2][6]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][7], metadata=LSH_metadata[1][2][7]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][0], metadata=LSH_metadata[1][3][0]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][1], metadata=LSH_metadata[1][3][1]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][2], metadata=LSH_metadata[1][3][2]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][3], metadata=LSH_metadata[1][3][3]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][4], metadata=LSH_metadata[1][3][4]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][5], metadata=LSH_metadata[1][3][5]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][6], metadata=LSH_metadata[1][3][6]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][7], metadata=LSH_metadata[1][3][7])
+        
     ],
     [
-        CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[2][0]),
-        CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[2][1]),
-        CBIR(BackBoneInstance[2], IndexingInstance[4], metadata=metadata_info[2][2]),
-        CBIR(BackBoneInstance[3], IndexingInstance[7], metadata=metadata_info[2][3]),   
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][0], metadata=LSH_metadata[2][0][0]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][1], metadata=LSH_metadata[2][0][1]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][2], metadata=LSH_metadata[2][0][2]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][3], metadata=LSH_metadata[2][0][3]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][4], metadata=LSH_metadata[2][0][4]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][5], metadata=LSH_metadata[2][0][5]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][6], metadata=LSH_metadata[2][0][6]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][7], metadata=LSH_metadata[2][0][7]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][0], metadata=LSH_metadata[2][1][0]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][1], metadata=LSH_metadata[2][1][1]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][2], metadata=LSH_metadata[2][1][2]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][3], metadata=LSH_metadata[2][1][3]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][4], metadata=LSH_metadata[2][1][4]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][5], metadata=LSH_metadata[2][1][5]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][6], metadata=LSH_metadata[2][1][6]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][7], metadata=LSH_metadata[2][1][7]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][0], metadata=LSH_metadata[2][2][0]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][1], metadata=LSH_metadata[2][2][1]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][2], metadata=LSH_metadata[2][2][2]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][3], metadata=LSH_metadata[2][2][3]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][4], metadata=LSH_metadata[2][2][4]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][5], metadata=LSH_metadata[2][2][5]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][6], metadata=LSH_metadata[2][2][6]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][7], metadata=LSH_metadata[2][2][7]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][0], metadata=LSH_metadata[2][3][0]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][1], metadata=LSH_metadata[2][3][1]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][2], metadata=LSH_metadata[2][3][2]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][3], metadata=LSH_metadata[2][3][3]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][4], metadata=LSH_metadata[2][3][4]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][5], metadata=LSH_metadata[2][3][5]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][6], metadata=LSH_metadata[2][3][6]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][7], metadata=LSH_metadata[2][3][7])
+        
     ],
     [
-        CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[3][0]),
-        CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[3][1]),
-        CBIR(BackBoneInstance[2], IndexingInstance[4], metadata=metadata_info[3][2]),
-        CBIR(BackBoneInstance[3], IndexingInstance[7], metadata=metadata_info[3][3]),  
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][0], metadata=LSH_metadata[3][0][0]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][1], metadata=LSH_metadata[3][0][1]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][2], metadata=LSH_metadata[3][0][2]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][3], metadata=LSH_metadata[3][0][3]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][4], metadata=LSH_metadata[3][0][4]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][5], metadata=LSH_metadata[3][0][5]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][6], metadata=LSH_metadata[3][0][6]),
+        CBIR(BackBoneInstance[0], LSH_index_instance[0][7], metadata=LSH_metadata[3][0][7]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][0], metadata=LSH_metadata[3][1][0]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][1], metadata=LSH_metadata[3][1][1]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][2], metadata=LSH_metadata[3][1][2]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][3], metadata=LSH_metadata[3][1][3]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][4], metadata=LSH_metadata[3][1][4]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][5], metadata=LSH_metadata[3][1][5]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][6], metadata=LSH_metadata[3][1][6]),
+        CBIR(BackBoneInstance[1], LSH_index_instance[1][7], metadata=LSH_metadata[3][1][7]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][0], metadata=LSH_metadata[3][2][0]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][1], metadata=LSH_metadata[3][2][1]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][2], metadata=LSH_metadata[3][2][2]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][3], metadata=LSH_metadata[3][2][3]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][4], metadata=LSH_metadata[3][2][4]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][5], metadata=LSH_metadata[3][2][5]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][6], metadata=LSH_metadata[3][2][6]),
+        CBIR(BackBoneInstance[2], LSH_index_instance[2][7], metadata=LSH_metadata[3][2][7]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][0], metadata=LSH_metadata[3][3][0]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][1], metadata=LSH_metadata[3][3][1]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][2], metadata=LSH_metadata[3][3][2]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][3], metadata=LSH_metadata[3][3][3]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][4], metadata=LSH_metadata[3][3][4]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][5], metadata=LSH_metadata[3][3][5]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][6], metadata=LSH_metadata[3][3][6]),
+        CBIR(BackBoneInstance[3], LSH_index_instance[3][7], metadata=LSH_metadata[3][3][7])
+        
     ],
-    
-]
 
+]
 ############################################################################################
 ################################# PERFORM INDEXING AND RETRIEVING ##########################
 ############################################################################################
-perform_index = [[False, False, False, False], 
-                 [False, False, False, False], 
-                 [False, False, False, False], 
-                 [True, False, True, False]]
-perform_eval =  [[False, False, False, False], 
-                 [False, False, False, False], 
-                 [False, False, False, False], 
-                 [True, False, True, False]]
-k_top = [5,7,9,11]
+perform_index = []
+for i in range(0,4,1): perform_index.append([False]*32)
+for i in range(0,16,1): perform_index[0][i] = False
+for i in range(24,32,1): perform_index[0][i] = False
+for j in range(1,4,1):
+    for i in range(0,32,1): perform_index[j][i] = False
+perform_eval = []
+for i in range(0,4,1): perform_eval.append([False]*32)
+for i in range(0,16,1): perform_eval[0][i] = False
+for i in range(0,16,1): perform_eval[0][i] = False
+for i in range(24,32,1): perform_eval[0][i] = False
+for j in range(1,4,1):
+    for i in range(0,32,1): perform_eval[j][i] = False
+perform_eval[3][6] = True
+k_top = [5]
 
 for idx_db in range(0, len(TestSearch), 1):
-    print("================================= Database",idx_db, "=================================")
+    print("================================= Database",idx_db + 1, "=================================")
     for idx_cbir in range(0, len(TestSearch[idx_db]), 1):
         if perform_index[idx_db][idx_cbir] == True:
             TestSearch[idx_db][idx_cbir].indexDB(mydataloader[idx_db][0])
