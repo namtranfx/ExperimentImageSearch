@@ -73,7 +73,7 @@ class FaissLSHIndex(FaissRawIndex):
         self._faiss_index = faiss.IndexLSH(feature_size, hash_width)
 class AnnoyLSHIndex(MyIndex):
     # f_len : length of feature need to be indexed
-    def __init__(self, f_len, num_tree = 10) -> None:
+    def __init__(self, f_len, num_tree = 10) -> None: 
         super().__init__()
         self.num_tree = num_tree
         self._index = AnnoyIndex(f_len, 'hamming') # Create object AnnoyIndex use angular similarity

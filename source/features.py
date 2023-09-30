@@ -9,7 +9,7 @@ from torchvision.models.feature_extraction import create_feature_extractor
 
 from source.losses import TripletLoss
 from source.data_handler import MyTransform_norm, MyTransform
-
+import timm 
 
 
 
@@ -38,6 +38,12 @@ class FeatureDescriptor:
         # print("[features.py]: shape of output: ", output.shape)
         return output.view(output.size(0), -1) # Flatten the output
 
+    def eval(self):
+        if self.model is not None: self.model.eval()
+        else: print("[ERROR]: Cannot change model into inference mode")
+    def train(self):
+        if self.model is not None: self.model.train()
+        else: print("[ERROR]: Cannot change model into train mode")
 class HOGFeature(FeatureDescriptor):
     def resize_(image):
         u = cv2.resize(image,(224,224))
@@ -62,10 +68,10 @@ class MobileNetV3Feature(FeatureDescriptor):
         return_nodes = {
             'flatten':'final_feature'
         }
-        self.only_feature_model = create_feature_extractor(self.model, return_nodes=return_nodes)
-        self.model = self.model.features
+        self.model = create_feature_extractor(self.model, return_nodes=return_nodes)
+        # self.model = self.model.features
     def extractFeature(self, img):
-        final_f = self.only_feature_model(img)['final_feature']
+        final_f = self.model(img)['final_feature']
         # feature = self.model(img)
         # #print("Shape of feature = ", feature.shape)
         # # return torch.flatten(feature, start_dim=1)
@@ -84,17 +90,17 @@ class MobileNetV3_small_composite(FeatureDescriptor):
             'classifier.2' : 'final_semantic', 
             'classifier.3' : 'classify_result'
         }
-        self.only_feature_model = create_feature_extractor(self.model, return_nodes=return_nodes)
+        self.model = create_feature_extractor(self.model, return_nodes=return_nodes)
     def extractFeature(self, img):
-        inference_result = self.only_feature_model(img)
+        inference_result = self.model(img)
         final_f = inference_result['final_feature'] # shape = 576
         first_semantic = inference_result['first_semantic'] # shape = 1024
         final_classify = inference_result['classify_result'] # shape = 1000
         
-        return first_semantic
+        return final_f
 class MobileNetV3Feature_flatten(MobileNetV3Feature):
     def extractFeature(self, img):
-        feature = self.model(img)
+        feature = self.model.features(img)
         # print("Shape of feature = ", feature.shape)
         # return torch.flatten(feature, start_dim=1)
         # compact_f = torch.nn.AdaptiveAvgPool2d(1)(feature)
@@ -108,11 +114,11 @@ class MobileNetV3Feature_large(MobileNetV3Feature):
         return_nodes = {
             'flatten':'final_feature'
         }
-        self.only_feature_model = create_feature_extractor(self.model, return_nodes=return_nodes)
-        self.model = self.model.features
+        self.model = create_feature_extractor(self.model, return_nodes=return_nodes)
+        # self.model = self.model.features
 class MobileNetV3Feature_large_flatten(MobileNetV3Feature_large):
     def extractFeature(self, img):
-        feature = self.model(img)
+        feature = self.model.features(img)
         # print("Shape of feature = ", feature.shape)
         # return torch.flatten(feature, start_dim=1)
         # compact_f = torch.nn.AdaptiveAvgPool2d(1)(feature)
@@ -239,6 +245,10 @@ class tinyvit_small(tinyvit):
        
         
 class Resnet18_custom_best(FeatureDescriptor):
+    """
+    This feature use pretrained weight saved in local storage and have the best 
+    performance than other pretrained weight
+    """
     def __init__(self) -> None:
         super().__init__()
         self.MODEL_PATH = ".\weight\\resnet18.pth"
@@ -250,6 +260,9 @@ class Resnet18_custom_best(FeatureDescriptor):
         
 
 class Resnet18Descriptor(FeatureDescriptor):
+    """
+    Resnet18 feature using downloaded pretrained weight for the model
+    """
     def __init__(self) -> None:
         super().__init__()
         model = models.resnet18(models.ResNet18_Weights.DEFAULT).cpu()
@@ -290,3 +303,15 @@ class Resnet50Descriptor(FeatureDescriptor):
         self.is_loaded = True
         self.model = torch.nn.Sequential(*(list(model.children())[:-1])) # strips off last linear layer
         
+class SwinTransformer_default(FeatureDescriptor):
+    def __init__(self) -> None:
+        super().__init__()
+        self.model = timm.create_model('swin_tiny_patch4_window7_224', pretrained=True).cpu()
+        return_nodes = {
+            'head.global_pool.flatten':'final_feature'
+        }
+        self.only_feature_model = create_feature_extractor(self.model, return_nodes=return_nodes)
+        # self.model = self.model.features
+    def extractFeature(self, img):
+        final_f = self.only_feature_model(img)['final_feature']
+        return final_f

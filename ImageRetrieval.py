@@ -1,7 +1,7 @@
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 import torch
-import torchvision
+import os
 
 from source.data_handler import MyTransform, CaltechDataset, CifarDataset, Oxford102Flower, CustomCocoDataset
 from source.CBIR import CBIR
@@ -108,10 +108,12 @@ mydataloader = [
     # [DataLoader(inriaHoliday_train, batch_size=1), DataLoader(inriaHoliday_test, batch_size=1)]
 ]
 BackBoneInstance = [
-    Resnet18_custom_best(),
+    # Resnet18_custom_best(),
+    Resnet18Descriptor(),
     Resnet50Descriptor(), 
-    MobileNetV3_small_composite(),
-    MobileNetV3Feature_large() #,
+    MobileNetV3Feature(),
+    MobileNetV3Feature_large(),
+    SwinTransformer_default()
     # tinyvit(),
     # tinyvit_small(),
     # MyEfficientViT()
@@ -131,6 +133,9 @@ IndexingInstance = [
     #mobilenetv3_large
     FaissRawIndex(960),#8----------
     FaissLSHIndex(960, 128),#9
+    #SwinTransformer_default
+    FaissRawIndex(768), #10----------
+    FaissLSHIndex(768, 128) #11
 ]
 
 metadata_info = [
@@ -141,7 +146,9 @@ metadata_info = [
      ["caltech101", "best_resnet18_LSHIndex"],
      ["caltech101", "resnet50_LSHIndex"],
      ["caltech101", "MobileNetV3_small_custom_LSHIndex"],
-     ["caltech101", "MobileNetV3_large_LSHIndex"]],
+     ["caltech101", "MobileNetV3_large_LSHIndex"],
+     ["caltech101", "SwinTransformer_default_RawIndex"],
+     ["caltech101", "SwinTransformer_default_LSHIndex"]],
     [["cifar10", "best_resnet18_RawIndex"],
      ["cifar10", "resnet50_RawIndex"],
      ["cifar10", "MobileNetV3_small_custom_RawIndex"],
@@ -157,7 +164,9 @@ metadata_info = [
      ["oxford102flower", "best_resnet18_LSHIndex"],
      ["oxford102flower", "resnet50_LSHIndex"],
      ["oxford102flower", "MobileNetV3_small_custom_LSHIndex"],
-     ["oxford102flower", "MobileNetV3_large_LSHIndex"]],
+     ["oxford102flower", "MobileNetV3_large_LSHIndex"],
+     ["oxford102flower", "SwinTransformer_default_RawIndex"],
+     ["oxford102flower", "SwinTransformer_default_LSHIndex"]],
     [["coco-2017", "best_resnet18_RawIndex"],
      ["coco-2017", "resnet50_RawIndex"],
      ["coco-2017", "MobileNetV3_small_custom_RawIndex"],
@@ -178,34 +187,35 @@ metadata_info = [
 ############################################################################################
 head_output = None
 # RawIndex id: 0, 3, 5, 8
-# TestSearch = [
-#     [
-#         CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[0][0]),
-#         CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[0][1]),
-#         CBIR(BackBoneInstance[2], IndexingInstance[5], metadata=metadata_info[0][2]),
-#         CBIR(BackBoneInstance[3], IndexingInstance[8], metadata=metadata_info[0][3]),
-          
-#     ],
-#     [
-#         CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[1][0]),
-#         CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[1][1]),
-#         CBIR(BackBoneInstance[2], IndexingInstance[5], metadata=metadata_info[1][2]),
-#         CBIR(BackBoneInstance[3], IndexingInstance[8], metadata=metadata_info[1][3]),   
-#     ],
-#     [
-#         CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[2][0]),
-#         CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[2][1]),
-#         CBIR(BackBoneInstance[2], IndexingInstance[5], metadata=metadata_info[2][2]),
-#         CBIR(BackBoneInstance[3], IndexingInstance[8], metadata=metadata_info[2][3]),   
-#     ],
-#     [
-#         CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[3][0]),
-#         CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[3][1]),
-#         CBIR(BackBoneInstance[2], IndexingInstance[5], metadata=metadata_info[3][2]),
-#         CBIR(BackBoneInstance[3], IndexingInstance[8], metadata=metadata_info[3][3]),  
-#     ],
+TestSearch_ = [
+    [
+        CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[0][0]),
+        CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[0][1]),
+        CBIR(BackBoneInstance[2], IndexingInstance[5], metadata=metadata_info[0][2]),
+        CBIR(BackBoneInstance[3], IndexingInstance[8], metadata=metadata_info[0][3]),
+        CBIR(BackBoneInstance[4], IndexingInstance[10], metadata=metadata_info[0][8])  
+    ],
+    [
+        CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[1][0]),
+        CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[1][1]),
+        CBIR(BackBoneInstance[2], IndexingInstance[5], metadata=metadata_info[1][2]),
+        CBIR(BackBoneInstance[3], IndexingInstance[8], metadata=metadata_info[1][3]),   
+    ],
+    [
+        CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[2][0]),
+        CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[2][1]),
+        CBIR(BackBoneInstance[2], IndexingInstance[5], metadata=metadata_info[2][2]),
+        CBIR(BackBoneInstance[3], IndexingInstance[8], metadata=metadata_info[2][3]), 
+        CBIR(BackBoneInstance[4], IndexingInstance[10], metadata=metadata_info[2][8])  
+    ],
+    [
+        CBIR(BackBoneInstance[0], IndexingInstance[0], metadata=metadata_info[3][0]),
+        CBIR(BackBoneInstance[1], IndexingInstance[3], metadata=metadata_info[3][1]),
+        CBIR(BackBoneInstance[2], IndexingInstance[5], metadata=metadata_info[3][2]),
+        CBIR(BackBoneInstance[3], IndexingInstance[8], metadata=metadata_info[3][3]),  
+    ],
     
-# ]
+]
 # LSHIndex id: 1, 4, 6, 9
 # TestSearch = [
 #     [
@@ -254,14 +264,14 @@ LSH_index_instance = [
     FaissLSHIndex(2048, 512),
     FaissLSHIndex(2048, 1024),
     FaissLSHIndex(2048, 2048)],
-    [FaissLSHIndex(1024, 16),
-    FaissLSHIndex(1024, 32),
-    FaissLSHIndex(1024, 64),
-    FaissLSHIndex(1024, 128),
-    FaissLSHIndex(1024, 256),
-    FaissLSHIndex(1024, 512),
-    FaissLSHIndex(1024, 1024),
-    FaissLSHIndex(1024, 2048)],
+    [FaissLSHIndex(576, 16),
+    FaissLSHIndex(576, 32),
+    FaissLSHIndex(576, 64),
+    FaissLSHIndex(576, 128),
+    FaissLSHIndex(576, 256),
+    FaissLSHIndex(576, 512),
+    FaissLSHIndex(576, 1024),
+    FaissLSHIndex(576, 2048)],
     [FaissLSHIndex(960, 16),
     FaissLSHIndex(960, 32),
     FaissLSHIndex(960, 64),
@@ -565,21 +575,55 @@ TestSearch = [
 ############################################################################################
 ################################# PERFORM INDEXING AND RETRIEVING ##########################
 ############################################################################################
+# #TESTING FOR RAWINDEX
+# perform_index = []
+# for i in range(0, 4, 1): perform_index.append([False]*4)
+# for i in range(3, 4, 1): perform_index[i][3] = True
+# perform_index[0].append(False)
+# perform_index[2].append(False)
+
+
+# perform_eval = []
+# for i in range(0, 4, 1): perform_eval.append([False]*4)
+# for i in range(3, 4, 1): perform_eval[i][3] = True
+# perform_eval[0].append(False)
+# perform_eval[2].append(False)
+
+# TESTING FOR LSHINDEX AT BITDEPTH
 perform_index = []
 for i in range(0,4,1): perform_index.append([False]*32)
-for i in range(0,16,1): perform_index[0][i] = False
-for i in range(24,32,1): perform_index[0][i] = False
-for j in range(1,4,1):
-    for i in range(0,32,1): perform_index[j][i] = False
+# for i in range(0,16,1): perform_index[0][i] = False
+# for i in range(7,32,1): perform_index[3][i] = True
+# for j in range(1,4,1):
+#     for i in range(0,32,1): perform_index[j][i] = False
+# perform_index[3][22] = True
+# perform_index[3][30] = True
 perform_eval = []
 for i in range(0,4,1): perform_eval.append([False]*32)
-for i in range(0,16,1): perform_eval[0][i] = False
-for i in range(0,16,1): perform_eval[0][i] = False
-for i in range(24,32,1): perform_eval[0][i] = False
-for j in range(1,4,1):
-    for i in range(0,32,1): perform_eval[j][i] = False
-perform_eval[3][6] = True
+# perform_eval[3][22] = True
+# perform_eval[3][30] = True
+for i in range(0,4,1):
+    for j in [6, 14, 22, 30]: perform_eval[i][j] = True
+# for i in range(0,16,1): perform_eval[0][i] = False
+# for i in range(6,32,1): perform_eval[3][i] = True
+# for j in range(1,4,1):
+#     for i in range(0,32,1): perform_eval[j][i] = False
+# perform_eval[3][6] = True
+# perform_eval[0][6] = True
 k_top = [5]
+# list_demo = [[
+                
+#              ],
+#              [
+                 
+#              ],
+#              [
+                 
+#              ],
+#              [
+                 
+#              ]
+#             ]
 
 for idx_db in range(0, len(TestSearch), 1):
     print("================================= Database",idx_db + 1, "=================================")
@@ -589,5 +633,6 @@ for idx_db in range(0, len(TestSearch), 1):
         # Evaluate phase
         if perform_eval[idx_db][idx_cbir] == True:
             for k in k_top:
-                TestSearch[idx_db][idx_cbir].evalRetrieval(mydataloader[idx_db][1], k)
+                #TestSearch[idx_db][idx_cbir].evalRetrieval(mydataloader[idx_db][1], k)
+                TestSearch[idx_db][idx_cbir].evalOnSingleQuery(os.getcwd())
         print("-------------------------------------------------------------------------------")
