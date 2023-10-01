@@ -5,5 +5,6 @@ source/__pycache__
 data
 index
 result
+log
 .gitignore
 *.pyc
