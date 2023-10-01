@@ -64,7 +64,9 @@ def showRetrievalResult(query, query_label, result, result_label, curr_AP, id, m
     numcol = 3
     numrow = 2
     # Reprocessing query image (from Torch tensor to RGB array image)
+    
     image_np = np.array(query)
+    # print("image shape before save: ", image_np.shape)
     image_np = np.squeeze(image_np) # Remove channel has length 1
     image_np = np.transpose(image_np, (1,2,0)) # Transpose to move color channels to the end
     # Show retrieved result
@@ -106,12 +108,12 @@ def saveRetrievalResult(query, query_label, result, result_label, curr_AP, id, m
     transform = T.ToPILImage()
     imgx = transform(query[0])
     # print("error path: ",newpath+"\\Query_mAP_" + str(curr_AP) + "_" + list2string(query_label)+".jpg")
-    imgx = imgx.save(newpath+"\\Query_mAP_" + str(curr_AP) + "_" + list2string(query_label)+".jpg")
+    imgx = imgx.save(newpath+"\\Query-mAP-" + str(curr_AP) + "-" + list2string(query_label)+".jpg")
     for idx in range(0, len(result), 1):
         imgx = Image.open(result[idx][0], mode="r")
         # print("error path: ", newpath+"\\Result_at_rank" + str(idx+1) + "_" + list2string(result_label[idx] if len(result_label[idx]) != 0 else "<empty>")+".jpg")
 
-        imgx = imgx.save(newpath+"\\Result_at_rank" + str(idx+1) + "_" + list2string(result_label[idx] if len(result_label[idx]) != 0 else "empty")+".jpg")
+        imgx = imgx.save(newpath+"\\Result-at-rank" + str(idx+1) + "-" + list2string(result_label[idx] if len(result_label[idx]) != 0 else "empty")+".jpg")
         
 def savelog(filename, content):
     curr_date = str(date.today())
@@ -228,27 +230,33 @@ class CBIR:
         self.loadDB()
         # self._m_model.loadDescriptor()
         print("Start querying database", self.metadata[0], "using feature", self.metadata[1], "with k =", k_top, "...")
-        
+        all_files_and_dirs = os.listdir(img_input_path)
+        files_only = [f for f in all_files_and_dirs if os.path.isfile(os.path.join(img_input_path, f))]
         with torch.no_grad():
-            for f in os.listdir(img_input_path):
-                print("---> Querying image: ", f)
-                img_path = os.path.join(img_input_path,f)
-                img = Image.open(img_path)
+
+            for img_filename in files_only:
+                img_path = os.path.join(img_input_path, img_filename)
+                print("---> Querying image: ", img_path)
+
+                img = Image.open(img_path).convert('RGB')
+                #print("img shape=", img.shape())
+                query_tensor = self._m_model._m_data_transform.process(img)
+                query_tensor = query_tensor.unsqueeze(0)
                 # Process imagepath to get real_label
                 real_label = []
-                imgpath_list = f.split("_")
+                imgpath_list = img_filename.split("-")
                 tag = imgpath_list[-1]
-                for i in range(3 if len(imgpath_list) >= 3 else len(imgpath_list) - 2, len(imgpath_list) - 1,1):
+                for i in range(3 if len(imgpath_list) > 3 else len(imgpath_list) - 2, len(imgpath_list) - 1,1):
                     real_label.append(imgpath_list[i])
 
                 # Retrieve in index table
-                retrieved_imgpath, retrieved_labels = self.retrieve(self._m_model._m_data_transform.process(img), k_top=k_top)
+                retrieved_imgpath, retrieved_labels = self.retrieve(query_tensor, k_top=k_top)
                 curr_AP = AP(real_label, retrieved_labels, k_top)
 
-                showRetrievalResult(img, real_label, retrieved_imgpath, retrieved_labels, curr_AP, tag, self.metadata)
-                saveRetrievalResult(img, real_label, retrieved_imgpath, retrieved_labels, curr_AP, tag, self.metadata)
+                showRetrievalResult(query_tensor, real_label, retrieved_imgpath, retrieved_labels, curr_AP, tag, self.metadata)
+                saveRetrievalResult(query_tensor, real_label, retrieved_imgpath, retrieved_labels, curr_AP, tag, self.metadata)
                 
-    def evalRetrieval(self, dataloader, k_top, list_demo = None):
+    def evalRetrieval(self, dataloader, k_top, list_demo:list = []):
         """
         Evaluation system on a validation dataset which have label
         Parameter:
@@ -256,7 +264,7 @@ class CBIR:
             k_top: number of retrieval elements
             list_demo: list that indicate the index of image wanna using as single query
         """
-        if list_demo == None:
+        if len(list_demo) == 0:
             number_demo = 5
             list_demo = random.sample(range(1,len(dataloader.dataset)), number_demo)
         self.loadDB()
@@ -274,14 +282,6 @@ class CBIR:
 
         self._m_model.eval()
         for batch in tqdm(dataloader):
-            #-----------Retrieve for single query
-            is_skip = True
-            for item in list_demo:
-                if item == num_query:
-                    is_skip = False
-            if is_skip: continue
-
-
             #------------------------------------
             start_query_time = time.time()
             if self.only_evalmode == False:

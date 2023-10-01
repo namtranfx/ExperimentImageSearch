@@ -602,7 +602,7 @@ perform_eval = []
 for i in range(0,4,1): perform_eval.append([False]*32)
 # perform_eval[3][22] = True
 # perform_eval[3][30] = True
-for i in range(0,4,1):
+for i in range(0,1,1):
     for j in [6, 14, 22, 30]: perform_eval[i][j] = True
 # for i in range(0,16,1): perform_eval[0][i] = False
 # for i in range(6,32,1): perform_eval[3][i] = True
@@ -624,15 +624,41 @@ k_top = [5]
                  
 #              ]
 #             ]
-
+folderpath_retrieve =  [[
+                          'D:\\temp\\thesis_result - Copy\lsh_query\Caltech101\\resnet18',
+                          'D:\\temp\\thesis_result - Copy\\lsh_query\\Caltech101\\resnet50', 
+                          'D:\\temp\\thesis_result - Copy\\lsh_query\\Caltech101\\mobilenetv3_small',
+                          'D:\\temp\\thesis_result - Copy\\lsh_query\\Caltech101\\mobilenetv3_large', 
+                        ],
+                        [
+                            'D:\\temp\\thesis_result - Copy\\lsh_query\\Cifar10\\resnet18',
+                            'D:\\temp\\thesis_result - Copy\\lsh_query\\Cifar10\\resnet50',
+                            'D:\\temp\\thesis_result - Copy\\lsh_query\\Cifar10\\mobilenetv3_small',
+                            'D:\\temp\\thesis_result - Copy\\lsh_query\\Cifar10\\mobilenetv3_large',
+                        ],
+                        [
+                            'D:\\temp\\thesis_result - Copy\\lsh_query\\Oxford102Flower\\resnet18',
+                            'D:\\temp\\thesis_result - Copy\\lsh_query\\Oxford102Flower\\resnet50',
+                            'D:\\temp\\thesis_result - Copy\\lsh_query\\Oxford102Flower\\mobilenetv3_small',
+                            'D:\\temp\\thesis_result - Copy\\lsh_query\\Oxford102Flower\\mobilenetv3_large',
+                        ],
+                        [
+                            'D:\\temp\\thesis_result - Copy\\lsh_query\\Coco2017\\resnet18',
+                            'D:\\temp\\thesis_result - Copy\\lsh_query\\Coco2017\\resnet50',
+                            'D:\\temp\\thesis_result - Copy\\lsh_query\\Coco2017\\mobilenetv3_small',
+                            'D:\\temp\\thesis_result - Copy\\lsh_query\\Coco2017\\mobilenetv3_large',
+                        ]
+                        ]
 for idx_db in range(0, len(TestSearch), 1):
     print("================================= Database",idx_db + 1, "=================================")
+    ii = 0
     for idx_cbir in range(0, len(TestSearch[idx_db]), 1):
         if perform_index[idx_db][idx_cbir] == True:
             TestSearch[idx_db][idx_cbir].indexDB(mydataloader[idx_db][0])
         # Evaluate phase
         if perform_eval[idx_db][idx_cbir] == True:
             for k in k_top:
-                #TestSearch[idx_db][idx_cbir].evalRetrieval(mydataloader[idx_db][1], k)
-                TestSearch[idx_db][idx_cbir].evalOnSingleQuery(os.getcwd())
+                TestSearch[idx_db][idx_cbir].evalRetrieval(mydataloader[idx_db][1], k)
+                # TestSearch[idx_db][idx_cbir].evalOnSingleQuery(folderpath_retrieve[idx_db][ii])
+            ii = ii + 1
         print("-------------------------------------------------------------------------------")

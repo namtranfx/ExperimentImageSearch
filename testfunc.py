@@ -191,20 +191,21 @@
 # test = MyEfficientViT()
 
 import torch
-from torchvision.models import resnet50, mobilenet_v3_small, mobilenet_v3_large
+from torchvision.models import resnet50, mobilenet_v3_small, mobilenet_v3_large, swin_t
 from torchvision.models.feature_extraction import get_graph_node_names
 from torchvision.models.feature_extraction import create_feature_extractor
 from torchvision.models.detection.mask_rcnn import MaskRCNN
 from torchvision.models.detection.backbone_utils import LastLevelMaxPool
 from torchvision.ops.feature_pyramid_network import FeaturePyramidNetwork
-
+import timm
 
 # To assist you in designing the feature extractor you may want to print out
 # the available nodes for resnet50.
 m = mobilenet_v3_small()
-train_nodes, eval_nodes = get_graph_node_names(mobilenet_v3_large())
+model = timm.create_model('swin_tiny_patch4_window7_224', pretrained=True)
+train_nodes, eval_nodes = get_graph_node_names(model)
 print(train_nodes)
-exit()
+# exit()
 # The lists returned, are the names of all the graph nodes (in order of
 # execution) for the input model traced in train mode and in eval mode
 # respectively. You'll find that `train_nodes` and `eval_nodes` are the same
@@ -248,9 +249,9 @@ exit()
 # }
 #create_feature_extractor(m, return_nodes=return_nodes)
 return_nodes = {
-    'flatten':'final_feature'
+    'head.global_pool.flatten':'final_feature'
 }
-body = create_feature_extractor(mobilenet_v3_small(), return_nodes=return_nodes)
+body = create_feature_extractor(model, return_nodes=return_nodes)
 
 inp = torch.randn(1, 3, 224, 224)
 out = body(inp)

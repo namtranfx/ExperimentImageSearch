@@ -1,10 +1,13 @@
 *.pyc
+source/__pycache__/*
 source/__pycache__/features.cpython-310.pyc
 source/__pycache__/CBIR.cpython-310.pyc
-source/__pycache__
+source/__pycache__/CBIR.cpython-310.pyc
+source/__pycache__/data_handler.cpython-310.pyc
+source/__pycache__/features.cpython-310.pyc
 data
 index
 result
 log
 .gitignore
-*.pyc
+log
