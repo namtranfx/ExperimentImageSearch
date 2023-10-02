@@ -458,8 +458,8 @@ perform_index = []
 for i in range(0,4,1): perform_index.append([False]*32)
 # for i in range(0,16,1): perform_index[0][i] = False
 # for i in range(7,32,1): perform_index[3][i] = True
-for i in range(3,4,1):
-    for j in [6, 14, 22, 30]: perform_index[i][j] = True
+# for i in range(3,4,1):
+#     for j in [6, 14, 22, 30]: perform_index[i][j] = True
 # perform_index[3][22] = True
 # perform_index[3][30] = True
 perform_eval = []
