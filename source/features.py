@@ -70,6 +70,7 @@ class MobileNetV3Feature(FeatureDescriptor):
         }
         self.model = create_feature_extractor(self.model, return_nodes=return_nodes)
         # self.model = self.model.features
+        self.model = self.model.to(self._device)
     def extractFeature(self, img):
         final_f = self.model(img)['final_feature']
         # feature = self.model(img)
@@ -116,6 +117,7 @@ class MobileNetV3Feature_large(MobileNetV3Feature):
         }
         self.model = create_feature_extractor(self.model, return_nodes=return_nodes)
         # self.model = self.model.features
+        self.model = self.model.to(self._device)
 class MobileNetV3Feature_large_flatten(MobileNetV3Feature_large):
     def extractFeature(self, img):
         feature = self.model.features(img)
@@ -155,6 +157,7 @@ class ResDeepFeature(FeatureDescriptor):
         # Use for self trainning model 
         self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
         self.triplet_loss = TripletLoss()
+        self.model = self.model.to(self._device)
     
     def trainDescriptor(self, train_loader):
         print("Training our Desciptor")
@@ -213,6 +216,7 @@ class tinyvit(FeatureDescriptor):
         # Đăng ký forward hook cho stage cuối cùng của mô hình
         #handle = self.model.blocks[-1].register_forward_hook(self.get_last_stage_output)
         self.model = tiny_vit_21m_224(pretrained=True)
+        self.model = self.model.to(self._device)
     def extractFeature(self, input):
         
 
@@ -228,6 +232,7 @@ class MyEfficientViT(FeatureDescriptor):
         super().__init__()
         model = EfficientViT_M0(pretrained='efficientvit_m0')
         self.model = nn.Sequential(*list(model.children())[:-1])
+        self.model = self.model.to(self._device)
     def extractFeature(self, img):
         feature = self.model(img)
         compact_f = torch.nn.AdaptiveAvgPool2d(1)(feature)
@@ -237,6 +242,7 @@ class MyEfficientViT(FeatureDescriptor):
 class tinyvit_small(tinyvit):
     def __init__(self) -> None:
         self.model = tiny_vit_5m_224(pretrained = True)
+        self.model = self.model.to(self._device)
     # Định nghĩa một hàm forward hook để lấy giá trị đầu ra của stage cuối cùng
     def get_last_stage_output(module, input, output):
         global last_stage_output
@@ -257,7 +263,7 @@ class Resnet18_custom_best(FeatureDescriptor):
         model.load_state_dict(torch.load(self.MODEL_PATH))
         model.eval()
         self.model = torch.nn.Sequential(*(list(model.children())[:-1])) # strips off last linear layer
-        
+        self.model = self.model.to(self._device)
 
 class Resnet18Descriptor(FeatureDescriptor):
     """
@@ -274,7 +280,7 @@ class Resnet18Descriptor(FeatureDescriptor):
         self.is_loaded = True
         
         self.model = torch.nn.Sequential(*(list(model.children())[:-1])) # strips off last linear layer
-
+        self.model = self.model.to(self._device)
 
 class Resnet34Descriptor(FeatureDescriptor):
     def __init__(self) -> None:
@@ -288,7 +294,7 @@ class Resnet34Descriptor(FeatureDescriptor):
             print("Your feature descriptor is loaded!")
         self.is_loaded = True
         self.model = torch.nn.Sequential(*(list(model.children())[:-1])) # strips off last linear layer
-
+        self.model = self.model.to(self._device)
 
 class Resnet50Descriptor(FeatureDescriptor):
     def __init__(self, ) -> None:
@@ -302,7 +308,8 @@ class Resnet50Descriptor(FeatureDescriptor):
             print("Your feature descriptor is loaded!")
         self.is_loaded = True
         self.model = torch.nn.Sequential(*(list(model.children())[:-1])) # strips off last linear layer
-        
+        self.model = self.model.to(self._device)
+
 class SwinTransformer_default(FeatureDescriptor):
     def __init__(self) -> None:
         super().__init__()
@@ -312,6 +319,7 @@ class SwinTransformer_default(FeatureDescriptor):
         }
         self.only_feature_model = create_feature_extractor(self.model, return_nodes=return_nodes)
         # self.model = self.model.features
+        self.model = self.model.to(self._device)
     def extractFeature(self, img):
         final_f = self.only_feature_model(img)['final_feature']
         return final_f

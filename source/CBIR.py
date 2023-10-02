@@ -170,7 +170,10 @@ class CBIR:
                 if self.only_evalmode == True: 
                     if len(batch) != 2: print("Print the batch: ", batch)
                     img, label = batch
-                else: img, label, filepath = batch
+                    img = img.to(self._m_model._device)
+                else: 
+                    img, label, filepath = batch
+                    img = img.to(self._m_model._device)
                 feature = self._m_model.extractFeature(img)
                 start_index = time.time()
                 if min_extract_time > (start_index - start_time): min_extract_time = start_index - start_time
@@ -215,8 +218,8 @@ class CBIR:
         """
         test_embed = None
         with torch.no_grad():
-            test_embed = self._m_model.extractFeature(im).cpu().numpy()
-        image_indices_retrieved = self.my_index.search(test_embed, k_top)
+            test_embed = self._m_model.extractFeature(im)
+        image_indices_retrieved = self.my_index.search(test_embed.cpu().numpy(), k_top)
         if self.only_evalmode == True: return self._labels[image_indices_retrieved]
         if self.transfer_index == True: return None, self._labels[image_indices_retrieved]
         return self._im_indices[image_indices_retrieved], self._labels[image_indices_retrieved]
@@ -286,9 +289,11 @@ class CBIR:
             start_query_time = time.time()
             if self.only_evalmode == False:
                 img, real_label, filepath = batch
+                img = img.to(self._m_model._device)
                 retrieved_imgpath, retrieved_labels = self.retrieve(img, k_top=k_top)
             else:
                 img, real_label = batch
+                img = img.to(self._m_model._device)
                 retrieved_labels = self.retrieve(img, k_top=k_top)
             end_query_time = time.time()
             sum_time = sum_time + (end_query_time - start_query_time)
