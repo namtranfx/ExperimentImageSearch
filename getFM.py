@@ -5,9 +5,7 @@ from torchvision import models, transforms, utils
 from torch.autograd import Variable
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy.misc
 from PIL import Image
-import json
 #matplotlib inline
 # Define the image transformations ---------------------------------
 transform = transforms.Compose([

@@ -594,15 +594,15 @@ perform_index = []
 for i in range(0,4,1): perform_index.append([False]*32)
 # for i in range(0,16,1): perform_index[0][i] = False
 # for i in range(7,32,1): perform_index[3][i] = True
-# for j in range(1,4,1):
-#     for i in range(0,32,1): perform_index[j][i] = False
+for i in range(3,4,1):
+    for j in [6, 14, 22, 30]: perform_index[i][j] = True
 # perform_index[3][22] = True
 # perform_index[3][30] = True
 perform_eval = []
 for i in range(0,4,1): perform_eval.append([False]*32)
 # perform_eval[3][22] = True
 # perform_eval[3][30] = True
-for i in range(0,1,1):
+for i in range(3,4,1):
     for j in [6, 14, 22, 30]: perform_eval[i][j] = True
 # for i in range(0,16,1): perform_eval[0][i] = False
 # for i in range(6,32,1): perform_eval[3][i] = True
@@ -658,7 +658,7 @@ for idx_db in range(0, len(TestSearch), 1):
         # Evaluate phase
         if perform_eval[idx_db][idx_cbir] == True:
             for k in k_top:
-                TestSearch[idx_db][idx_cbir].evalRetrieval(mydataloader[idx_db][1], k)
-                # TestSearch[idx_db][idx_cbir].evalOnSingleQuery(folderpath_retrieve[idx_db][ii])
+                # TestSearch[idx_db][idx_cbir].evalRetrieval(mydataloader[idx_db][1], k)
+                TestSearch[idx_db][idx_cbir].evalOnSingleQuery(folderpath_retrieve[idx_db][ii])
             ii = ii + 1
         print("-------------------------------------------------------------------------------")

@@ -1,0 +1,6 @@
+#!pip install -r manual_requirements.txt 
+#!apt install libomp-dev
+!pip install faiss-cpu
+
+!pip install torch==2.0.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+!pip install torchvision==0.15.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
