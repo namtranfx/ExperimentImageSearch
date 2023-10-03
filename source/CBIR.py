@@ -305,25 +305,27 @@ class CBIR:
             curr_AP = AP(real_label, retrieved_labels, k_top)
             if min_AP > curr_AP*100: 
                 min_AP = curr_AP * 100
-                minAP_data = list([img, real_label, retrieved_imgpath, retrieved_labels])
+                del minAP_data
+                minAP_data = list([img.cpu(), real_label, retrieved_imgpath, retrieved_labels, num_query])
             if max_AP < curr_AP*100: 
                 max_AP = curr_AP * 100
-                maxAP_data = list([img, real_label, retrieved_imgpath, retrieved_labels])
+                del maxAP_data
+                maxAP_data = list([img.cpu(), real_label, retrieved_imgpath, retrieved_labels, num_query])
 
             sumAP = sumAP + curr_AP
 
             for item in list_demo:
                 if num_query == item:
-                    showRetrievalResult(img, real_label, retrieved_imgpath, retrieved_labels, curr_AP, num_query - 1, self.metadata)
-                    saveRetrievalResult(img, real_label, retrieved_imgpath, retrieved_labels, curr_AP, num_query - 1, self.metadata)
+                    showRetrievalResult(img.cpu(), real_label, retrieved_imgpath, retrieved_labels, curr_AP, num_query, self.metadata)
+                    saveRetrievalResult(img.cpu(), real_label, retrieved_imgpath, retrieved_labels, curr_AP, num_query, self.metadata)
             num_query = num_query + 1
         
         # Save best and worst retrieval result
-        saveRetrievalResult(minAP_data[0], minAP_data[1], minAP_data[2], minAP_data[3], min_AP, "WORST_RESULT", self.metadata)
-        showRetrievalResult(minAP_data[0], minAP_data[1], minAP_data[2], minAP_data[3], min_AP, "WORST_RESULT", self.metadata)
+        saveRetrievalResult(minAP_data[0], minAP_data[1], minAP_data[2], minAP_data[3], min_AP, str(minAP_data[4]) + "WORST_RESULT", self.metadata)
+        showRetrievalResult(minAP_data[0], minAP_data[1], minAP_data[2], minAP_data[3], min_AP, str(minAP_data[4]) + "WORST_RESULT", self.metadata)
         
-        saveRetrievalResult(maxAP_data[0], maxAP_data[1], maxAP_data[2], maxAP_data[3], max_AP, "BEST_RESULT", self.metadata)
-        showRetrievalResult(maxAP_data[0], maxAP_data[1], maxAP_data[2], maxAP_data[3], max_AP, "BEST_RESULT", self.metadata)
+        saveRetrievalResult(maxAP_data[0], maxAP_data[1], maxAP_data[2], maxAP_data[3], max_AP, str(maxAP_data[4]) + "BEST_RESULT", self.metadata)
+        showRetrievalResult(maxAP_data[0], maxAP_data[1], maxAP_data[2], maxAP_data[3], max_AP, str(maxAP_data[4]) + "BEST_RESULT", self.metadata)
         
         if num_query == 0: print("No query image found!")
         else:
