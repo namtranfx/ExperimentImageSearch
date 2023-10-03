@@ -27,26 +27,26 @@ from source.ultis import to_rgb
 ############################################################################################
 transform_img = MyTransform()
 
-# # CALTECH-101 DATASET
-# PATH_CALTECH101 = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\caltech-101\\101_ObjectCategories"
-# caltech101ds = CaltechDataset(PATH_CALTECH101, transform_img)
-# caltech_train_indices, caltech_test_indices = train_test_split(range(len(caltech101ds)),stratify=caltech101ds.getLabels(), test_size=0.2)
-# caltech101_train = torch.utils.data.Subset(caltech101ds, caltech_train_indices)
-# caltech101_test = torch.utils.data.Subset(caltech101ds, caltech_test_indices)
-# # CIFAR-10 DATASET
-# PATH_CIFAR10 = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\cifar-10\\train"
+# CALTECH-101 DATASET
+PATH_CALTECH101 = "\\content\\dataset\\caltech-101\\101_ObjectCategories"
+caltech101ds = CaltechDataset(PATH_CALTECH101, transform_img)
+caltech_train_indices, caltech_test_indices = train_test_split(range(len(caltech101ds)),stratify=caltech101ds.getLabels(), test_size=0.2)
+caltech101_train = torch.utils.data.Subset(caltech101ds, caltech_train_indices)
+caltech101_test = torch.utils.data.Subset(caltech101ds, caltech_test_indices)
+# CIFAR-10 DATASET
+PATH_CIFAR10 = "\\content\\dataset\\cifar-10\\train"
 
-# cifar10ds = CifarDataset(PATH_CIFAR10, transform_img)
-# cifar10_train_indices, cifar10_test_indices = train_test_split(range(len(cifar10ds)),stratify=cifar10ds.getLabels(), test_size=0.2)
-# cifar10_train = torch.utils.data.Subset(cifar10ds, cifar10_train_indices)
-# cifar10_test = torch.utils.data.Subset(cifar10ds, cifar10_test_indices)
-# # OXFORD-102-FLOWER DATASET
-# PATH_OXFORD102FLOWERS_TRAIN = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\102flowers_categorized\\dataset\\train"
-# PATH_OXFORD102FLOWERS_TEST = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\102flowers_categorized\\dataset\\valid"
-# oxford102flower_train = Oxford102Flower(PATH_OXFORD102FLOWERS_TRAIN, transform_img)
-# oxford102flower_test = Oxford102Flower(PATH_OXFORD102FLOWERS_TEST, transform_img)
+cifar10ds = CifarDataset(PATH_CIFAR10, transform_img)
+cifar10_train_indices, cifar10_test_indices = train_test_split(range(len(cifar10ds)),stratify=cifar10ds.getLabels(), test_size=0.2)
+cifar10_train = torch.utils.data.Subset(cifar10ds, cifar10_train_indices)
+cifar10_test = torch.utils.data.Subset(cifar10ds, cifar10_test_indices)
+# OXFORD-102-FLOWER DATASET
+PATH_OXFORD102FLOWERS_TRAIN = "\\content\\dataset\\102flowers_categorized\\dataset\\train"
+PATH_OXFORD102FLOWERS_TEST = "\\content\\dataset\\102flowers_categorized\\dataset\\valid"
+oxford102flower_train = Oxford102Flower(PATH_OXFORD102FLOWERS_TRAIN, transform_img)
+oxford102flower_test = Oxford102Flower(PATH_OXFORD102FLOWERS_TEST, transform_img)
 
-# # NUS-WIDE DATASET
+# NUS-WIDE DATASET
 
 # MS-COCO 2017 DATASET
 dataDir = '/content/dataset'
@@ -95,22 +95,10 @@ coco_val = CustomCocoDataset(root=f'{dataDir}/{dataType_val}', annFile=annFile_v
 
 # #-----------------------------------------------
 
-# mydataloader = [
-#     [DataLoader(caltech101_train, batch_size=1), DataLoader(caltech101_test, batch_size=1)],
-#     [DataLoader(cifar10_train, batch_size=1), DataLoader(cifar10_test, batch_size=1)],
-#     [DataLoader(oxford102flower_train, batch_size=1), DataLoader(oxford102flower_test, batch_size=1)],
-#     [DataLoader(coco_train, batch_size=1), DataLoader(coco_val, batch_size=1)],
-#     # [flickr30k_trainloader, flickr30k_testloader],
-#     # [caltech101_trainloader, caltech101_testloader],
-#     # [cifar_trainloader, cifar_testloader],
-#     # [DataLoader(oxford5k_train, batch_size=1), DataLoader(oxford5k_test, batch_size=1)],
-#     # [DataLoader(corel5k_train, batch_size=1), DataLoader(corel5k_test, batch_size=1)],
-#     # [DataLoader(inriaHoliday_train, batch_size=1), DataLoader(inriaHoliday_test, batch_size=1)]
-# ]
 mydataloader = [
-    [None, None],
-    [None, None],
-    [None, None],
+    [DataLoader(caltech101_train, batch_size=1), DataLoader(caltech101_test, batch_size=1)],
+    [DataLoader(cifar10_train, batch_size=1), DataLoader(cifar10_test, batch_size=1)],
+    [DataLoader(oxford102flower_train, batch_size=1), DataLoader(oxford102flower_test, batch_size=1)],
     [DataLoader(coco_train, batch_size=1), DataLoader(coco_val, batch_size=1)],
     # [flickr30k_trainloader, flickr30k_testloader],
     # [caltech101_trainloader, caltech101_testloader],
@@ -119,6 +107,18 @@ mydataloader = [
     # [DataLoader(corel5k_train, batch_size=1), DataLoader(corel5k_test, batch_size=1)],
     # [DataLoader(inriaHoliday_train, batch_size=1), DataLoader(inriaHoliday_test, batch_size=1)]
 ]
+# mydataloader = [
+#     [None, None],
+#     [None, None],
+#     [None, None],
+#     [DataLoader(coco_train, batch_size=1), DataLoader(coco_val, batch_size=1)],
+#     # [flickr30k_trainloader, flickr30k_testloader],
+#     # [caltech101_trainloader, caltech101_testloader],
+#     # [cifar_trainloader, cifar_testloader],
+#     # [DataLoader(oxford5k_train, batch_size=1), DataLoader(oxford5k_test, batch_size=1)],
+#     # [DataLoader(corel5k_train, batch_size=1), DataLoader(corel5k_test, batch_size=1)],
+#     # [DataLoader(inriaHoliday_train, batch_size=1), DataLoader(inriaHoliday_test, batch_size=1)]
+# ]
 BackBoneInstance = [
     # Resnet18_custom_best(),
     Resnet18Descriptor(),
