@@ -194,11 +194,10 @@ class InriaHolidayDataset(CustomDataset):
             self.labels.append(label)            
 
 class CifarDataset(CustomDataset):
-    def __init__(self, datasetpath, transform: MyTransform) -> None:
+    def __init__(self, datasetpath, csv_label_path, transform: MyTransform) -> None:
         super().__init__(transform)
 
-        csv_label = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\cifar-10\\trainLabels.csv"
-        label_dataframe = pd.read_csv(csv_label)
+        label_dataframe = pd.read_csv(csv_label_path)
 
         for idx_row in range(0, label_dataframe.shape[0], 1):
             id = label_dataframe.iloc[idx_row][label_dataframe.columns.values[0]]
