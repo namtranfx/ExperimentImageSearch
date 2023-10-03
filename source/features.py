@@ -319,7 +319,7 @@ class SwinTransformer_default(FeatureDescriptor):
         }
         self.only_feature_model = create_feature_extractor(self.model, return_nodes=return_nodes)
         # self.model = self.model.features
-        self.model = self.model.to(self._device)
+        self.only_feature_model = self.only_feature_model.to(self._device)
     def extractFeature(self, img):
         final_f = self.only_feature_model(img)['final_feature']
         return final_f

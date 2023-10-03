@@ -244,16 +244,16 @@ folderpath_retrieve =  [[
 ############################################################################################
 #TESTING FOR RAWINDEX
 perform_index = []
-for i in range(0, 4, 1): perform_index.append([False]*5)
+for i in range(0, 4, 1): perform_index.append([True]*5)
 # for i in range(0, 4, 1): perform_index[i][4] = True
 # for i in [1,3]: perform_index[i][4] = True
-perform_index[3][4] = True
+# perform_index[3][4] = True
 
 perform_eval = []
-for i in range(0, 4, 1): perform_eval.append([False]*5)
+for i in range(0, 4, 1): perform_eval.append([True]*5)
 # for i in range(0, 4, 1): perform_eval[i][4] = True
 # for i in [1,3]: perform_eval[i][4] = True
-perform_eval[3][4] = True
+# perform_eval[3][4] = True
 
 k_top = [5]
 
