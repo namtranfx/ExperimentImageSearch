@@ -162,7 +162,7 @@ metadata_info = [
     [["oxford102flower", "best_resnet18_RawIndex"],
      ["oxford102flower", "resnet50_RawIndex"],
      ["oxford102flower", "MobileNetV3_small_custom_RawIndex"],
-     ["oxford102flower", "MobileNetV3_large_RawIndex"]
+     ["oxford102flower", "MobileNetV3_large_RawIndex"],
      ["oxford102flower", "SwinTransformer_default_RawIndex"]],
     [["coco-2017", "best_resnet18_RawIndex"],
      ["coco-2017", "resnet50_RawIndex"],

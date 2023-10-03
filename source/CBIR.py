@@ -18,24 +18,23 @@ from source.metrics import AP
 from source.index import MyIndex
 from source.features import FeatureDescriptor
 
-def list2string(mylist):
+def list2string(mylist : list):
     final_str = ""
     final_list = []
     final_list.append(mylist[0])
-    for src in mylist:
+    for idx in range(1, len(mylist), 1):
         is_save = True
         for dst in final_list:
-            if src == dst: 
+            if mylist[idx] == dst: 
                 is_save = False
                 break
         if is_save == True:
-            final_list.append(src)
-    
+            final_list.append(mylist[idx])
+    # print("All raw label: ", final_list)
 
     for i in range(0, len(final_list)):
-        if len(final_str) >= 255: break
-        final_str = final_str + str(final_list[i]).strip("'(),\n ")
-        if (i + 1) != len(final_list): final_str = final_str + "_"
+        if len(final_str) + len(final_list[i]) >= 255: break
+        final_str = final_str +  ("_" if i != 0 else "") + str(final_list[i]).strip("'(),")
     return final_str.strip(" ")
 
 
@@ -250,10 +249,12 @@ class CBIR:
                 imgpath_list = img_filename.split("-")
                 tag = imgpath_list[-1]
                 for i in range(3 if len(imgpath_list) > 3 else len(imgpath_list) - 2, len(imgpath_list) - 1,1):
-                    real_label.append(imgpath_list[i])
+                    real_label.append("('" + imgpath_list[i] + "',)")
+                # print("Real label: ", real_label)
 
                 # Retrieve in index table
                 retrieved_imgpath, retrieved_labels = self.retrieve(query_tensor, k_top=k_top)
+                
                 curr_AP = AP(real_label, retrieved_labels, k_top)
 
                 showRetrievalResult(query_tensor, real_label, retrieved_imgpath, retrieved_labels, curr_AP, tag, self.metadata)

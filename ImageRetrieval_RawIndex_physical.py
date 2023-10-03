@@ -150,7 +150,7 @@ metadata_info = [
     [["oxford102flower", "best_resnet18_RawIndex"],
      ["oxford102flower", "resnet50_RawIndex"],
      ["oxford102flower", "MobileNetV3_small_custom_RawIndex"],
-     ["oxford102flower", "MobileNetV3_large_RawIndex"]
+     ["oxford102flower", "MobileNetV3_large_RawIndex"],
      ["oxford102flower", "SwinTransformer_default_RawIndex"]],
     [["coco-2017", "best_resnet18_RawIndex"],
      ["coco-2017", "resnet50_RawIndex"],
@@ -235,13 +235,13 @@ perform_index = []
 for i in range(0, 4, 1): perform_index.append([False]*5)
 # for i in range(0, 4, 1): perform_index[i][4] = True
 # for i in [1,3]: perform_index[i][4] = True
-# perform_index[3][4] = True
+perform_index[0][2] = True
 
 perform_eval = []
 for i in range(0, 4, 1): perform_eval.append([False]*5)
 # for i in range(0, 4, 1): perform_eval[i][4] = True
 # for i in [1,3]: perform_eval[i][4] = True
-# perform_eval[3][4] = True
+perform_eval[0][2] = True
 
 k_top = [5]
 
@@ -255,7 +255,7 @@ for idx_db in range(0, len(TestSearch), 1):
         # Evaluate phase
         if perform_eval[idx_db][idx_cbir] == True:
             for k in k_top:
-                # TestSearch[idx_db][idx_cbir].evalRetrieval(mydataloader[idx_db][1], k)
-                TestSearch[idx_db][idx_cbir].evalOnSingleQuery(folderpath_retrieve[idx_db][ii])
+                TestSearch[idx_db][idx_cbir].evalRetrieval(mydataloader[idx_db][1], k)
+                # TestSearch[idx_db][idx_cbir].evalOnSingleQuery(folderpath_retrieve[idx_db][ii])
             ii = ii + 1
         print("-------------------------------------------------------------------------------")

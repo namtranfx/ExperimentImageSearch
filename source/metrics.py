@@ -4,7 +4,8 @@ def Similarity(true_label, predicted_label):
     n_same = 0
     for sub_pred_label in predicted_label:
         for sub_true_label in true_label:
-            if sub_pred_label == sub_true_label: n_same = n_same + 1
+            # print("Comparing: (real)", sub_true_label, "(type: ", type(sub_true_label),  ") vs ", sub_pred_label, "(type: ", type(sub_pred_label), ") is ", str(sub_pred_label) == str(sub_true_label))
+            if str(sub_pred_label) == str(sub_true_label): n_same = n_same + 1
     if n_same >= 1: return True # Threshold
     return False
 
