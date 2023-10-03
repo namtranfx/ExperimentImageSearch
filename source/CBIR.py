@@ -83,7 +83,7 @@ def showRetrievalResult(query, query_label, result, result_label, curr_AP, id, m
             axs[i,j].set_title(list2string(result_label[idx_img]) if len(result_label[idx_img]) != 0 else "<empty>")
             idx_img = idx_img + 1
     #print("Retrieved Image: {}".format(result[0]))
-    plt.savefig(".\\result\\" + meta[0] + "_by_" + meta[1] + "_with_" + str(id) + ".png", bbox_inches='tight')
+    plt.savefig("." + os.sep + "result" + os.sep + meta[0] + "_by_" + meta[1] + "_with_" + str(id) + ".png", bbox_inches='tight')
     plt.close()
 
 def saveRetrievalResult(query, query_label, result, result_label, curr_AP, id, meta):
@@ -101,23 +101,23 @@ def saveRetrievalResult(query, query_label, result, result_label, curr_AP, id, m
     """
     # print("shape of query = ", query.shape)
     # print("type of query = ", type(query))
-    newpath = ".\\result\\" + meta[0] + "_by_" + meta[1] + "_with_" + str(id)
+    newpath = "." + os.sep + "result" + os.sep + meta[0] + "_by_" + meta[1] + "_with_" + str(id)
     if not os.path.exists(newpath):
         os.makedirs(newpath)
     transform = T.ToPILImage()
     imgx = transform(query[0])
     # print("error path: ",newpath+"\\Query_mAP_" + str(curr_AP) + "_" + list2string(query_label)+".jpg")
-    imgx = imgx.save(newpath+"\\Query-mAP-" + str(curr_AP) + "-" + list2string(query_label)+".jpg")
+    imgx = imgx.save(newpath+ os.sep + "Query-mAP-" + str(curr_AP) + "-" + list2string(query_label)+".jpg")
     for idx in range(0, len(result), 1):
         imgx = Image.open(result[idx][0], mode="r")
         # print("error path: ", newpath+"\\Result_at_rank" + str(idx+1) + "_" + list2string(result_label[idx] if len(result_label[idx]) != 0 else "<empty>")+".jpg")
 
-        imgx = imgx.save(newpath+"\\Result-at-rank" + str(idx+1) + "-" + list2string(result_label[idx] if len(result_label[idx]) != 0 else "empty")+".jpg")
+        imgx = imgx.save(newpath+ os.sep + "Result-at-rank" + str(idx+1) + "-" + list2string(result_label[idx] if len(result_label[idx]) != 0 else "empty")+".jpg")
         
 def savelog(filename, content):
     curr_date = str(date.today())
     curr_time = time.strftime("%Hh%Mm%Ss", time.localtime())
-    log_file = open(".\\log\\" + curr_date + "_" + curr_time + "_" + filename + ".txt", "w")
+    log_file = open("." + os.sep + "log" + os.sep + curr_date + "_" + curr_time + "_" + filename + ".txt", "w")
     log_file.write(content)
 
     log_file.close()
@@ -138,9 +138,9 @@ class CBIR:
         self.transfer_index = transfer_index
 
         # Path for database
-        self.INDEX_PATH = ".\index\\" + str(metadata[0]) + "_" + str(metadata[1]) + ".index"
-        self.DB_IMGPATH = ".\index\\" + str(metadata[0]) + "_imgpath.npy"
-        self.DB_LABELS_PATH = ".\index\\" + str(metadata[0]) + "_labels.npy"
+        self.INDEX_PATH = "." + os.sep + "index" + os.sep + str(metadata[0]) + "_" + str(metadata[1]) + ".index"
+        self.DB_IMGPATH = "." + os.sep + "index" + os.sep + str(metadata[0]) + "_imgpath.npy"
+        self.DB_LABELS_PATH = "." + os.sep + "index" + os.sep + str(metadata[0]) + "_labels.npy"
     def loadDB(self):
         if self.is_ready == False:
             self.my_index.loadIndex(self.INDEX_PATH)

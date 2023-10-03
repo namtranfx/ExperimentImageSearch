@@ -35,8 +35,9 @@ caltech101_train = torch.utils.data.Subset(caltech101ds, caltech_train_indices)
 caltech101_test = torch.utils.data.Subset(caltech101ds, caltech_test_indices)
 # CIFAR-10 DATASET
 PATH_CIFAR10 = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\cifar-10\\train"
+csv_label_path = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\cifar-10\\trainLabels.csv"
 
-cifar10ds = CifarDataset(PATH_CIFAR10, transform_img)
+cifar10ds = CifarDataset(PATH_CIFAR10, csv_label_path, transform_img)
 cifar10_train_indices, cifar10_test_indices = train_test_split(range(len(cifar10ds)),stratify=cifar10ds.getLabels(), test_size=0.2)
 cifar10_train = torch.utils.data.Subset(cifar10ds, cifar10_train_indices)
 cifar10_test = torch.utils.data.Subset(cifar10ds, cifar10_test_indices)
