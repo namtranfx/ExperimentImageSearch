@@ -1,6 +1,8 @@
 import faiss
 from faiss import write_index, read_index
 from annoy import AnnoyIndex
+from source.lsh import LSH as RawLSH, CosineHashFamily, cosine_distance
+
 import os
 
 
@@ -189,7 +191,6 @@ class NewLSHIndex(MyIndex):
                     num_hashtables=hashtable,
                     storage_config={"dict": None}
                 )
-
     def add(self, feature_vec, label = None):
         if self.is_loaded == True:
             print("[WARNING]: Adding to the existed index. Deleting and re-initializing...")
@@ -197,10 +198,11 @@ class NewLSHIndex(MyIndex):
             self.__init__(self.bitdepth, self.input_dim, self.hash_table)
             self.is_loaded = False
         # self.lsh.index(feature_vec, extra_data=label)
-        self.lsh.index([feature_vec.flatten()], extra_data=self.idx)
+        self.lsh.index(csr_matrix(feature_vec.flatten()), extra_data=self.idx)
         self.idx = self.idx + 1
     def saveIndex(self, path):
         super().saveIndex(path)
+        
         with open(self.final_path, "wb") as f:
             pickle.dump(self.lsh, f)
         self.is_loaded = True
@@ -218,9 +220,67 @@ class NewLSHIndex(MyIndex):
         if self.is_loaded == False:
             print("[WARNNG]: Querying in a empty index!")
             return [None * k_top]
-        points = self.lsh.query(query_feature_vec, num_results=k_top, distance_func="hamming")
+        points = self.lsh.query(csr_matrix(query_feature_vec.flatten()), num_results=k_top, distance_func="euclidean")
         index_points = [point[0][1] for point in points]
         return index_points
+
+#========================================================
+
+class RawLSHIndex(MyIndex):
+    def __init__(self, bitdepth, num_features) -> None:
+        super().__init__()
+        self.num_features = num_features
+        self.bitdepth = bitdepth
+        self.hash_family = CosineHashFamily(bitdepth)
+        self.lsh = RawLSH(self.hash_family, num_features)
+        self.metric = cosine_distance
+        self.points_cache = []
+        self.idx = 0
+    def build_lsh(self):
+        self.lsh.index(self.points_cache)
+        del self.points_cache
+
+    def add(self, feature_vec, label = None):
+        if self.is_loaded == True:
+            print("[WARNING]: Adding to the existed index. Deleting and re-initializing...")
+            del self.lsh
+            # if len(self.points_cache) > 0: del self.points_cache
+            self.__init__(self.bitdepth, self.num_features)
+            self.is_loaded = False
+
+        self.points_cache.append(feature_vec.flatten())
+
+        # self.lsh.index_t(feature_vec.flatten(), self.idx)
+        # self.idx = self.idx + 1
+
+    def saveIndex(self, path):
+        super().saveIndex(path)
+        
+        self.build_lsh()
+        with open(self.final_path, "wb") as f:
+            pickle.dump(self.lsh, f)
+        self.is_loaded = True
+
+    def loadIndex(self, path):
+        if self.is_loaded == True:
+            print("[WARNING]: Another index existed. Overriding new index!")
+            del self.lsh
+            if len(self.points_cache) > 0: del self.points_cache
+        super().loadIndex(path)
+        with open(self.final_path, "rb") as f:
+            self.lsh = pickle.load(f)
+        self.is_loaded = True
+
+    def search(self, query_feature_vec, k_top):
+        if self.is_loaded == False:
+            print("[WARNNG]: Querying in a empty index!")
+            return [None * k_top]
+        points = self.lsh.query(query_feature_vec.flatten(), self.metric, num_neighbors=k_top)
+        # print("Number of result: ", len(points))
+        index_points = [point[0] for point in points]
+        
+        return index_points
+
 
 class FaissRawIndex(MyIndex):
     def __init__(self, feature_size) -> None:
@@ -280,7 +340,7 @@ class CustomAnnoyIndex(MyIndex):
         super().saveIndex(path)
         self._index.build(self.num_tree)
         self.idx = 0
-        self._index.save(path + ".ann")
+        self._index.save(self.final_path)
         self.is_loaded = True
     def loadIndex(self, path):
         if self.is_loaded == True:
@@ -288,7 +348,7 @@ class CustomAnnoyIndex(MyIndex):
             del self.lsh
             self.__init__(self.feature_len, self.num_tree)
         super().loadIndex(path)
-        self._index.load(path + ".ann")
+        self._index.load(self.final_path)
         self.is_loaded = True
     def search(self, query_feature_vec, k_top = 5):
         if self.is_loaded == False:

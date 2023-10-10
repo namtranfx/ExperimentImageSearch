@@ -366,6 +366,11 @@ class CBIR:
         
         if num_query == 0: print("No query image found!")
         else:
+            log = "System Hardware Specifications\n"
+            log = log + self.metadata[2] + "\n"
+            log = log + self.metadata[3] + "\n"
+            log = log + self.metadata[4] + "\n"
+            log = log + "==================================================\n"
             log = log + "Performance of system: mAP = " + str(sumAP * 100/num_query) + "%\n"
             log = log + "Max Performance of system at a single query: MaxAP = " + str(max_AP) + "%\n"
             log = log + "------------------------------------------------\n"
