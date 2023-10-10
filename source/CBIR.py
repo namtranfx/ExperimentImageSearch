@@ -1,6 +1,8 @@
 import os
 import time
 from datetime import date
+import GPUtil
+import psutil
 
 import random
 import glob
@@ -124,23 +126,52 @@ def savelog(filename, content):
 
 class CBIR:
     # metadata structure: [dataset_name, model_name]
-    def __init__(self, model : FeatureDescriptor, index_sys : MyIndex, metadata, transfer_index = False, evalmode = False) -> None:
+    def __init__(self, model : FeatureDescriptor, index_sys : MyIndex, metadata : list, transfer_index = False, evalmode = False) -> None:
+        # Collect and save parameters data
         self.metadata = metadata
-        # Feature descriptor
-        self._m_model = model
-        # Indexing system
-        self.my_index = index_sys
+        self._m_model = model # Feature descriptor
+        self.my_index = index_sys # Indexing system
+
+        # CBIR variables initializing
         self._im_indices = []
         self._labels = []
+
         # sys config
         self.is_ready = False
         self.only_evalmode = evalmode
         self.transfer_index = transfer_index
 
+        # Get environment specs
+        self.sys_specs()
+
+
         # Path for database
         self.INDEX_PATH = "." + os.sep + "index" + os.sep + str(metadata[0]) + "_" + str(metadata[1]) + ".index"
         self.DB_IMGPATH = "." + os.sep + "index" + os.sep + str(metadata[0]) + "_imgpath.npy"
         self.DB_LABELS_PATH = "." + os.sep + "index" + os.sep + str(metadata[0]) + "_labels.npy"
+    def sys_specs(self):
+        
+        # GPU info
+        gpus = GPUtil.getGPUs()
+        gpu_specs = "GPU: None"
+        if len(gpus) != 0:
+            gpu_name = gpus[0].name
+            gpu_total_memory = f"{gpus[0].memoryTotal/1024:.1f}GB"
+            gpu_specs = "GPU:" + gpu_name + "_" + gpu_total_memory
+
+        # other info
+        cpufreq = psutil.cpu_freq()
+        cpu_specs = f"CPU: {psutil.cpu_count(logical=False)}C{psutil.cpu_count(logical=True)}T_{cpufreq.current/1000:.1f}Ghz"
+        # RAM info
+        mem_info = psutil.virtual_memory()
+        ram_specs = f"RAM: {mem_info.total/(1024*1024*1024):.1f}GB"
+        # print("gpu specs: ", gpu_specs)
+        # print("cpu specs: ", cpu_specs)
+        # print("ram specs: ", ram_specs)
+        self.metadata.append(gpu_specs)
+        self.metadata.append(cpu_specs)
+        self.metadata.append(ram_specs)
+        
     def loadDB(self):
         if self.is_ready == False:
             self.my_index.loadIndex(self.INDEX_PATH)
@@ -151,7 +182,12 @@ class CBIR:
             print("System has already loaded before!")
     def indexDB(self, dataloader):
         # save log
-        log = ""
+        log = "System Hardware Specifications\n"
+        log = log + self.metadata[2] + "\n"
+        log = log + self.metadata[3] + "\n"
+        log = log + self.metadata[4] + "\n"
+        log = log + "==================================================\n"
+
         log = log + "Indexing " + str(len(dataloader)) + " images of database "+ self.metadata[0] + " using feature " + self.metadata[1] + " ...\n"
         
         print("Indexing", len(dataloader), "images of database", self.metadata[0], "using feature", self.metadata[1], "...")
@@ -187,6 +223,7 @@ class CBIR:
                 self._labels.append(label)  # Store the label of image above
                 end_time = time.time()
                 sum_time = sum_time + (end_time - start_time)
+        
         log = log + "Total indexing database progress time: " + str(sum_time) + "s\n"
         log = log + "Average time of index a photo: " + str(sum_time*1000/len(dataloader)) + "ms\n"
         log = log + "------------------------------------------------\n"
@@ -329,6 +366,11 @@ class CBIR:
         
         if num_query == 0: print("No query image found!")
         else:
+            log = "System Hardware Specifications\n"
+            log = log + self.metadata[2] + "\n"
+            log = log + self.metadata[3] + "\n"
+            log = log + self.metadata[4] + "\n"
+            log = log + "==================================================\n"
             log = log + "Performance of system: mAP = " + str(sumAP * 100/num_query) + "%\n"
             log = log + "Max Performance of system at a single query: MaxAP = " + str(max_AP) + "%\n"
             log = log + "------------------------------------------------\n"
