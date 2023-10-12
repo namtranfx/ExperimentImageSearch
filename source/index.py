@@ -51,7 +51,7 @@ class MyIndex:
         Need to re-implement this method for specific index
         """
         file_ver, newest_ver, isFound, path_component = self.checkIndexVer(path)
-        print(file_ver, newest_ver, isFound)
+        # print(file_ver, newest_ver, isFound)
         final_path = ""
         if file_ver == 0: # No version is specified, load newest version index file which was saved
             if (newest_ver == -1): 
@@ -110,7 +110,6 @@ class MyIndex:
         # Check version of file in directory
         newest_ver = -1 # No index file existed
         isFound = False # State of finding index file in directory
-        print("finding index file in folder: ", dir_path)
         for filename in os.listdir(dir_path):
             if os.path.isfile(os.path.join(dir_path, filename)):
                 #print("checking file: ", filename)
@@ -119,7 +118,7 @@ class MyIndex:
                 name_component = name.split("-fx") 
                 #print("comparing two name: ", str(name_component[0]) , " and ", str(index_filename_component[0]))
                 if str(name_component[0]) == str(index_filename_component[0]) and extension == file_extension:
-                    print("Found file")
+                    # print("Found file")
                     if newest_ver == -1: newest_ver = 0 # means empty version in index filename
                     if len(name_component) > 1:
                         cur_ver = int(name_component[1])
@@ -174,7 +173,7 @@ class NewLSHIndex_old(MyIndex):
             print("[WARNNG]: Querying in a empty index!")
             return [None * k_top]
         nearest_vectors = self.lsh.query(query_feature_vec.flatten(), num_results=k_top, distance_func="l1norm")
-        print("Number of retrieved elements: ", len(nearest_vectors))
+        # print("Number of retrieved elements: ", len(nearest_vectors))
         nearest_indices = [vec[0][1] for vec in nearest_vectors]
         return nearest_indices
 
