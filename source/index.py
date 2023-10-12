@@ -134,22 +134,22 @@ import pickle
 from lshashpy3 import LSHash
 import math
 class NewLSHIndex_old(MyIndex):
-    def __init__(self, bitdepth, input_dim, hashtable = 5) -> None:
+    def __init__(self, feature_size, bitdepth, hashtable = 5) -> None:
         super().__init__()
         self.idx = 0
         self.bitdepth = bitdepth
-        self.input_dim = input_dim
+        self.feature_size = feature_size
         self.hash_table = hashtable
 
-        # hashtable_t = int(math.sqrt(input_dim)) if hashtable == 0 else hashtable
-        self.lsh = LSHash(hash_size=bitdepth, input_dim=input_dim, num_hashtables= hashtable)
+        # hashtable_t = int(math.sqrt(feature_size)) if hashtable == 0 else hashtable
+        self.lsh = LSHash(feature_size=feature_size, hash_size=bitdepth, num_hashtables= hashtable)
         
 
     def add(self, feature_vec):
         if self.is_loaded == True:
             print("[WARNING]: Adding to the existed index. Deleting and re-initializing...")
             del self.lsh
-            self.__init__(self.bitdepth, self.input_dim, self.hash_table)
+            self.__init__(self.bitdepth, self.feature_size, self.hash_table)
             self.is_loaded = False    
         # print("index vector shape: ", feature_vec.shape)
         self.lsh.index(feature_vec.flatten(), extra_data=self.idx)
@@ -179,15 +179,15 @@ class NewLSHIndex_old(MyIndex):
         return nearest_indices
 
 class NewLSHIndex(MyIndex):
-    def __init__(self, bitdepth, input_dim, hashtable = 5) -> None:
+    def __init__(self, feature_size, bitdepth, hashtable = 5) -> None:
         super().__init__()
         self.idx = 0
         self.bitdepth = bitdepth
-        self.input_dim = input_dim
+        self.feature_size = feature_size
         self.hash_table = hashtable
         self.lsh = LSH(
                     bitdepth,
-                    input_dim,
+                    feature_size,
                     num_hashtables=hashtable,
                     storage_config={"dict": None}
                 )
@@ -195,7 +195,7 @@ class NewLSHIndex(MyIndex):
         if self.is_loaded == True:
             print("[WARNING]: Adding to the existed index. Deleting and re-initializing...")
             del self.lsh
-            self.__init__(self.bitdepth, self.input_dim, self.hash_table)
+            self.__init__(self.feature_size, self.bitdepth, self.hash_table)
             self.is_loaded = False
         # self.lsh.index(feature_vec, extra_data=label)
         self.lsh.index(csr_matrix(feature_vec.flatten()), extra_data=self.idx)
@@ -226,13 +226,13 @@ class NewLSHIndex(MyIndex):
 
 #========================================================
 
-class RawLSHIndex(MyIndex):
-    def __init__(self, bitdepth, num_features) -> None:
+class CustomLSHIndex(MyIndex):
+    def __init__(self, feature_size, bitdepth) -> None:
         super().__init__()
-        self.num_features = num_features
+        self.feature_size = feature_size
         self.bitdepth = bitdepth
         self.hash_family = CosineHashFamily(bitdepth)
-        self.lsh = RawLSH(self.hash_family, num_features)
+        self.lsh = RawLSH(self.hash_family, feature_size)
         self.metric = cosine_distance
         self.points_cache = []
         self.idx = 0
@@ -245,7 +245,7 @@ class RawLSHIndex(MyIndex):
             print("[WARNING]: Adding to the existed index. Deleting and re-initializing...")
             del self.lsh
             # if len(self.points_cache) > 0: del self.points_cache
-            self.__init__(self.bitdepth, self.num_features)
+            self.__init__(self.feature_size, self.bitdepth)
             self.is_loaded = False
 
         self.points_cache.append(feature_vec.flatten())
@@ -280,7 +280,7 @@ class RawLSHIndex(MyIndex):
         index_points = [point[0] for point in points]
         
         return index_points
-
+    
 
 class FaissRawIndex(MyIndex):
     def __init__(self, feature_size) -> None:
@@ -315,10 +315,12 @@ class FaissRawIndex(MyIndex):
             return [None * k_top]
         _, I = self._faiss_index.search(query_feature_vec, k_top)
         return I[0][:]
+    
 class FaissLSHIndex(FaissRawIndex):
     def __init__(self, feature_size, hash_width) -> None:
         super().__init__(feature_size)
         self._faiss_index = faiss.IndexLSH(feature_size, hash_width)
+    
 class CustomAnnoyIndex(MyIndex):
     # f_len : length of feature need to be indexed
     def __init__(self, f_len, num_tree = 10) -> None: 
