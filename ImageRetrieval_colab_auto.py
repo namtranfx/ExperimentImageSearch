@@ -112,11 +112,11 @@ all_dataloader = [
 BackBoneInstance = [
     # Resnet18_custom_best(),
     Resnet18Descriptor(),
-    # Resnet50Descriptor(), 
-    # MobileNetV3Feature(),
-    # MobileNetV3Feature_large(),
-    # SwinTransformer_default(),
-    # tinyvit(),
+    Resnet50Descriptor(), 
+    MobileNetV3Feature(),
+    MobileNetV3Feature_large(),
+    SwinTransformer_default(),
+    tinyvit(),
     # tinyvit_small(),
     # MyEfficientViT()
 ]
@@ -127,19 +127,19 @@ BackBoneInstance = [
 
 #================
 # Database system
-# database_name = ["Caltech101", "Cifar10", "Oxford102Flower", "COCO2017"]
-database_name = ["Caltech101"]
+database_name = ["Caltech101", "Cifar10", "Oxford102Flower", "COCO2017"]
+# database_name = ["Caltech101"]
 mydataloader = []
 # 0: caltech101
 # 1: cifar10
 # 2: oxford102flower
 # 3: coco2017
-database_id = [0] # corresponding to index value of dataloader
+database_id = [0, 1, 2, 3] # corresponding to index value of dataloader
 for idx in database_id:
     mydataloader.append(all_dataloader[idx])
 # Index system
-# feature_dim = [512, 2048, 576, 960, 768, 360] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
-feature_dim = [512] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
+feature_dim = [512, 2048, 576, 960, 768, 360] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
+# feature_dim = [512] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
 RawIndex_bitdepth = [0]
 FaissLSH_bitdepth = [16, 32, 64, 128, 256, 512, 1024, 2048]
 CustomLSH_bitdepth = [1, 2, 3, 4, 5, 6, 7, 8]
@@ -157,7 +157,7 @@ index_creator_config = [
 # FaissRawIndex: 0
 # FaissLSHIndex: 1
 # CustomLSHIndex: 2
-index_type = [0] # IMPORTANT PARAM ==================================================
+index_type = [0, 1, 2] # IMPORTANT PARAM ==================================================
 Index_instances = []
 for index_type_id in range(0, len(index_type), 1):
     index_type_list = []
