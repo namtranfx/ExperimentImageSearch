@@ -1,3 +1,18 @@
+from source.lsh import *
+import numpy as np
+
+points = [np.array([1,2,3,4,5]), np.array([10,8,9,5,12]), np.array([35,6,44,21,3])]
+query = np.array([22,4,6,17,9])
+tester = LSHTester(points,query, 1)
+tester.build_lsh(CosineHashFamily(6), 5)
+
+
+
+
+
+
+
+exit()
 # from torchvision.datasets import Caltech101
 # from torch.utils.data import random_split
 
