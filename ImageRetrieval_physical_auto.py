@@ -142,7 +142,7 @@ for idx in database_id:
 feature_dim = [512] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
 RawIndex_bitdepth = [0]
 FaissLSH_bitdepth = [16, 32, 64, 128, 256, 512, 1024, 2048]
-CustomLSH_bitdepth = [1, 2, 3, 4, 5, 6, 7, 8]
+CustomLSH_bitdepth = [1, 2, 3, 4, 5, 6]
 bitdepth_config = [
     RawIndex_bitdepth,
     FaissLSH_bitdepth,
