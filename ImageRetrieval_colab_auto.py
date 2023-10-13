@@ -142,7 +142,7 @@ feature_dim = [512, 2048, 576, 960, 768, 360] # resnet18, resnet50, mobilenetv3_
 # feature_dim = [512] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
 RawIndex_bitdepth = [0]
 FaissLSH_bitdepth = [16, 32, 64, 128, 256, 512, 1024, 2048]
-CustomLSH_bitdepth = [1, 2, 3, 4, 5, 6, 7, 8]
+CustomLSH_bitdepth = [1, 2, 3, 4, 5, 6]
 bitdepth_config = [
     RawIndex_bitdepth,
     FaissLSH_bitdepth,
@@ -215,12 +215,8 @@ for index_type_id in range(0, len(index_type), 1):
         perform_eval_db = []
         for backbone_id in range(0, len(BackBoneInstance), 1):
             for bitdep_id in range(0, len(bitdepth_config[index_type[index_type_id]]), 1):
-                if index_type[index_type_id] == 2 and bitdepth_config[index_type[index_type_id]][bitdep_id] >= 6:
-                    perform_index_db.append(False)
-                    perform_eval_db.append(False)
-                else:
-                    perform_index_db.append(True)
-                    perform_eval_db.append(True)
+                perform_index_db.append(True)
+                perform_eval_db.append(True)
         perform_index.append(perform_index_db)
         perform_eval.append(perform_eval_db)
     Control_for_type.append([perform_index, perform_eval])
