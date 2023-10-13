@@ -246,10 +246,10 @@ for index_type_id in range(0, len(index_type), 1):
         print("================================= Database",idx_db + 1, "=================================")
         ii = 0
         for idx_cbir in range(0, len(TestSearch[index_type_id][idx_db]), 1):
-            if perform_index[idx_db][idx_cbir] == True:
+            if Control_for_type[index_type_id][0][idx_db][idx_cbir] == True:
                 TestSearch[index_type_id][idx_db][idx_cbir].indexDB(mydataloader[idx_db][0])
             # Evaluate phase
-            if perform_eval[idx_db][idx_cbir] == True:
+            if Control_for_type[index_type_id][1][idx_db][idx_cbir] == True:
                 for k in k_top:
                     TestSearch[index_type_id][idx_db][idx_cbir].evalRetrieval(mydataloader[idx_db][1], k)
                 ii = ii + 1
