@@ -77,7 +77,7 @@ class LSH:
         q_bits = self.binary_hash(q)
         candidates = set()
         num_diff_bit = 0
-        while len(candidates) < num_neighbors and num_diff_bit < 4:
+        while len(candidates) < num_neighbors and num_diff_bit < self.hash_family.num_bits/2:
 
             for diff_bits in combinations(range(self.hash_family.num_bits), num_diff_bit):
                 alternate_bits = q_bits.copy()

@@ -29,38 +29,38 @@ from source.ultis import to_rgb
 transform_img = MyTransform()
 
 # CALTECH-101 DATASET
-PATH_CALTECH101 = "/content/dataset/caltech-101/101_ObjectCategories"
+PATH_CALTECH101 = "/kaggle/working/dataset/caltech-101/101_ObjectCategories"
 caltech101ds = CaltechDataset(PATH_CALTECH101, transform_img)
 caltech_train_indices, caltech_test_indices = train_test_split(range(len(caltech101ds)),stratify=caltech101ds.getLabels(), test_size=0.2)
 caltech101_train = torch.utils.data.Subset(caltech101ds, caltech_train_indices)
 caltech101_test = torch.utils.data.Subset(caltech101ds, caltech_test_indices)
 # CIFAR-10 DATASET
-PATH_CIFAR10 = "/content/dataset/cifar-10/train"
-csv_label_path = "/content/dataset/cifar-10/trainLabels.csv"
+PATH_CIFAR10 = "/kaggle/working/dataset/cifar-10/train"
+csv_label_path = "/kaggle/working/dataset/cifar-10/trainLabels.csv"
 
 cifar10ds = CifarDataset(PATH_CIFAR10, csv_label_path, transform_img)
 cifar10_train_indices, cifar10_test_indices = train_test_split(range(len(cifar10ds)),stratify=cifar10ds.getLabels(), test_size=0.2)
 cifar10_train = torch.utils.data.Subset(cifar10ds, cifar10_train_indices)
 cifar10_test = torch.utils.data.Subset(cifar10ds, cifar10_test_indices)
 # OXFORD-102-FLOWER DATASET
-PATH_OXFORD102FLOWERS_TRAIN = "/content/dataset/102flowers_categorized/dataset/train"
-PATH_OXFORD102FLOWERS_TEST = "/content/dataset/102flowers_categorized/dataset/valid"
+PATH_OXFORD102FLOWERS_TRAIN = "/kaggle/working/dataset/102flowers_categorized/dataset/train"
+PATH_OXFORD102FLOWERS_TEST = "/kaggle/working/dataset/102flowers_categorized/dataset/valid"
 oxford102flower_train = Oxford102Flower(PATH_OXFORD102FLOWERS_TRAIN, transform_img)
 oxford102flower_test = Oxford102Flower(PATH_OXFORD102FLOWERS_TEST, transform_img)
 
 # NUS-WIDE DATASET
 
-# MS-COCO 2017 DATASET
-dataDir = '/content/dataset'
+# # MS-COCO 2017 DATASET
+# dataDir = '/kaggle/working/dataset'
 
-dataType_val = 'val2017'
-dataType_train = 'train2017'
+# dataType_val = 'val2017'
+# dataType_train = 'train2017'
 
-annFile_train = f'{dataDir}/annotations/instances_{dataType_train}.json'
-annFile_val = f'{dataDir}/annotations/instances_{dataType_val}.json'
+# annFile_train = f'{dataDir}/annotations/instances_{dataType_train}.json'
+# annFile_val = f'{dataDir}/annotations/instances_{dataType_val}.json'
 
-coco_train = CustomCocoDataset(root=f'{dataDir}/{dataType_train}', annFile=annFile_train, transform=transform_img)
-coco_val = CustomCocoDataset(root=f'{dataDir}/{dataType_val}', annFile=annFile_val, transform=transform_img)
+# coco_train = CustomCocoDataset(root=f'{dataDir}/{dataType_train}', annFile=annFile_train, transform=transform_img)
+# coco_val = CustomCocoDataset(root=f'{dataDir}/{dataType_val}', annFile=annFile_val, transform=transform_img)
 
 # =============================================================================================
 
@@ -101,7 +101,7 @@ all_dataloader = [
     [DataLoader(caltech101_train, batch_size=1), DataLoader(caltech101_test, batch_size=1)],
     [DataLoader(cifar10_train, batch_size=1), DataLoader(cifar10_test, batch_size=1)],
     [DataLoader(oxford102flower_train, batch_size=1), DataLoader(oxford102flower_test, batch_size=1)],
-    [DataLoader(coco_train, batch_size=1), DataLoader(coco_val, batch_size=1)],
+    # [DataLoader(coco_train, batch_size=1), DataLoader(coco_val, batch_size=1)],
     # [flickr30k_trainloader, flickr30k_testloader],
     # [caltech101_trainloader, caltech101_testloader],
     # [cifar_trainloader, cifar_testloader],
@@ -127,22 +127,22 @@ BackBoneInstance = [
 
 #================
 # Database system
-database_name = ["Caltech101", "Cifar10", "Oxford102Flower", "COCO2017"]
+database_name = ["Caltech101", "Cifar10", "Oxford102Flower"]
 # database_name = ["Caltech101"]
 mydataloader = []
 # 0: caltech101
 # 1: cifar10
 # 2: oxford102flower
 # 3: coco2017
-database_id = [0, 1, 2, 3] # corresponding to index value of dataloader
+database_id = [0, 1, 2] # corresponding to index value of dataloader
 for idx in database_id:
     mydataloader.append(all_dataloader[idx])
 # Index system
-feature_dim = [512, 2048, 576, 960, 768, 360] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
+feature_dim = [512, 2048, 576, 960, 768, 576] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
 # feature_dim = [512] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
 RawIndex_bitdepth = [0]
 FaissLSH_bitdepth = [16, 32, 64, 128, 256, 512, 1024, 2048]
-CustomLSH_bitdepth = [1, 2, 3, 4, 5, 6]
+CustomLSH_bitdepth = [1, 2, 3, 4, 5, 6, 7, 8]
 bitdepth_config = [
     RawIndex_bitdepth,
     FaissLSH_bitdepth,
