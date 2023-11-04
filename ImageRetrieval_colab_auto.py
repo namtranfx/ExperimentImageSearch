@@ -29,38 +29,40 @@ from source.ultis import to_rgb
 transform_img = MyTransform()
 
 # # CALTECH-101 DATASET
-# PATH_CALTECH101 = "/kaggle/working/dataset/caltech-101/101_ObjectCategories"
+# PATH_CALTECH101 = "/kaggle/input/cbir-ds/caltech-101/caltech-101/101_ObjectCategories"
 # caltech101ds = CaltechDataset(PATH_CALTECH101, transform_img)
 # caltech_train_indices, caltech_test_indices = train_test_split(range(len(caltech101ds)),stratify=caltech101ds.getLabels(), test_size=0.2)
 # caltech101_train = torch.utils.data.Subset(caltech101ds, caltech_train_indices)
 # caltech101_test = torch.utils.data.Subset(caltech101ds, caltech_test_indices)
 # # CIFAR-10 DATASET
-# PATH_CIFAR10 = "/kaggle/working/dataset/cifar-10/train"
-# csv_label_path = "/kaggle/working/dataset/cifar-10/trainLabels.csv"
+# PATH_CIFAR10 = "/kaggle/input/cbir-ds/cifar-10/cifar-10/train"
+# csv_label_path = "/kaggle/input/cbir-ds/cifar-10/cifar-10/trainLabels.csv"
 
 # cifar10ds = CifarDataset(PATH_CIFAR10, csv_label_path, transform_img)
 # cifar10_train_indices, cifar10_test_indices = train_test_split(range(len(cifar10ds)),stratify=cifar10ds.getLabels(), test_size=0.2)
 # cifar10_train = torch.utils.data.Subset(cifar10ds, cifar10_train_indices)
 # cifar10_test = torch.utils.data.Subset(cifar10ds, cifar10_test_indices)
 # # OXFORD-102-FLOWER DATASET
-# PATH_OXFORD102FLOWERS_TRAIN = "/kaggle/working/dataset/102flowers_categorized/dataset/train"
-# PATH_OXFORD102FLOWERS_TEST = "/kaggle/working/dataset/102flowers_categorized/dataset/valid"
+# PATH_OXFORD102FLOWERS_TRAIN = "/kaggle/input/cbir-ds/102flowers_categorized/102flowers_categorized/dataset/train"
+# PATH_OXFORD102FLOWERS_TEST = "/kaggle/input/cbir-ds/102flowers_categorized/102flowers_categorized/dataset/valid"
 # oxford102flower_train = Oxford102Flower(PATH_OXFORD102FLOWERS_TRAIN, transform_img)
 # oxford102flower_test = Oxford102Flower(PATH_OXFORD102FLOWERS_TEST, transform_img)
 
 # NUS-WIDE DATASET
 
 # MS-COCO 2017 DATASET
-dataDir = '/kaggle/working/dataset'
+dataDir_train = '/kaggle/input/cbir-ds/train2017'
+dataDir_val = '/kaggle/input/cbir-ds/val2017'
+annFileDir = '/kaggle/input/cbir-ds/annotations_trainval2017'
 
 dataType_val = 'val2017'
 dataType_train = 'train2017'
 
-annFile_train = f'{dataDir}/annotations/instances_{dataType_train}.json'
-annFile_val = f'{dataDir}/annotations/instances_{dataType_val}.json'
+annFile_train = f'{annFileDir}/annotations/instances_{dataType_train}.json'
+annFile_val = f'{annFileDir}/annotations/instances_{dataType_val}.json'
 
-coco_train = CustomCocoDataset(root=f'{dataDir}/{dataType_train}', annFile=annFile_train, transform=transform_img)
-coco_val = CustomCocoDataset(root=f'{dataDir}/{dataType_val}', annFile=annFile_val, transform=transform_img)
+coco_train = CustomCocoDataset(root=f'{dataDir_train}/{dataType_train}', annFile=annFile_train, transform=transform_img)
+coco_val = CustomCocoDataset(root=f'{dataDir_val}/{dataType_val}', annFile=annFile_val, transform=transform_img)
 
 # =============================================================================================
 
