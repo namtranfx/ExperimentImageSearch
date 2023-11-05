@@ -161,7 +161,7 @@ index_creator_config = [
 # FaissRawIndex: 0
 # FaissLSHIndex: 1
 # CustomLSHIndex: 2
-index_type = [0, 1] # IMPORTANT PARAM ==================================================
+index_type = [1] # IMPORTANT PARAM ==================================================
 Index_instances = []
 for index_type_id in range(0, len(index_type), 1):
     index_type_list = []
