@@ -113,8 +113,8 @@ all_dataloader = [
 ]
 BackBoneInstance = [
     # Resnet18_custom_best(),
-    Resnet18Descriptor(),
-    Resnet50Descriptor(), 
+    # Resnet18Descriptor(),
+    # Resnet50Descriptor(), 
     MobileNetV3Feature(),
     MobileNetV3Feature_large(),
     SwinTransformer_default(),
@@ -142,7 +142,7 @@ for idx in database_id:
     mydataloader.append(all_dataloader[idx])
 # Index system
 # feature_dim = [512, 2048, 576, 960, 768, 576]
-feature_dim = [512, 2048, 576, 960, 768, 576] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
+feature_dim = [576, 960, 768, 576] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
 # feature_dim = [512] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
 RawIndex_bitdepth = [0]
 FaissLSH_bitdepth = [16, 32, 64, 128, 256, 512, 1024, 2048]
