@@ -130,14 +130,14 @@ BackBoneInstance = [
 #================
 # Database system
 # Name: ["Caltech101", "Cifar10", "Oxford102Flower", "Coco2017"]
-database_name = ["Cifar10", "Oxford102Flower"]
+database_name = ["Oxford102Flower"]
 # database_name = ["Coco2017"]
 mydataloader = []
 # 0: caltech101
 # 1: cifar10
 # 2: oxford102flower
 # 3: coco2017
-database_id = [1, 2] # corresponding to index value of dataloader
+database_id = [2] # corresponding to index value of dataloader
 for idx in database_id:
     mydataloader.append(all_dataloader[idx])
 # Index system
