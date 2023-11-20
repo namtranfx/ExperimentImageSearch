@@ -50,19 +50,19 @@ oxford102flower_test = Oxford102Flower(PATH_OXFORD102FLOWERS_TEST, transform_img
 
 # NUS-WIDE DATASET
 
-# # MS-COCO 2017 DATASET
-# dataDir_train = '/kaggle/input/cbir-ds/train2017'
-# dataDir_val = '/kaggle/input/cbir-ds/val2017'
-# annFileDir = '/kaggle/input/cbir-ds/annotations_trainval2017'
+# MS-COCO 2017 DATASET
+dataDir_train = '/kaggle/input/cbir-ds/train2017'
+dataDir_val = '/kaggle/input/cbir-ds/val2017'
+annFileDir = '/kaggle/input/cbir-ds/annotations_trainval2017'
 
-# dataType_val = 'val2017'
-# dataType_train = 'train2017'
+dataType_val = 'val2017'
+dataType_train = 'train2017'
 
-# annFile_train = f'{annFileDir}/annotations/instances_{dataType_train}.json'
-# annFile_val = f'{annFileDir}/annotations/instances_{dataType_val}.json'
+annFile_train = f'{annFileDir}/annotations/instances_{dataType_train}.json'
+annFile_val = f'{annFileDir}/annotations/instances_{dataType_val}.json'
 
-# coco_train = CustomCocoDataset(root=f'{dataDir_train}/{dataType_train}', annFile=annFile_train, transform=transform_img)
-# coco_val = CustomCocoDataset(root=f'{dataDir_val}/{dataType_val}', annFile=annFile_val, transform=transform_img)
+coco_train = CustomCocoDataset(root=f'{dataDir_train}/{dataType_train}', annFile=annFile_train, transform=transform_img)
+coco_val = CustomCocoDataset(root=f'{dataDir_val}/{dataType_val}', annFile=annFile_val, transform=transform_img)
 
 # =============================================================================================
 
@@ -100,10 +100,10 @@ oxford102flower_test = Oxford102Flower(PATH_OXFORD102FLOWERS_TEST, transform_img
 #-----------------------------------------------
 
 all_dataloader = [
-    [DataLoader(caltech101_train, batch_size=1), DataLoader(caltech101_test, batch_size=1)],
-    [DataLoader(cifar10_train, batch_size=1), DataLoader(cifar10_test, batch_size=1)],
-    [DataLoader(oxford102flower_train, batch_size=1), DataLoader(oxford102flower_test, batch_size=1)],
-    # [DataLoader(coco_train, batch_size=1), DataLoader(coco_val, batch_size=1)],
+    # [DataLoader(caltech101_train, batch_size=1), DataLoader(caltech101_test, batch_size=1)],
+    # [DataLoader(cifar10_train, batch_size=1), DataLoader(cifar10_test, batch_size=1)],
+    # [DataLoader(oxford102flower_train, batch_size=1), DataLoader(oxford102flower_test, batch_size=1)],
+    [DataLoader(coco_train, batch_size=1), DataLoader(coco_val, batch_size=1)],
     # [flickr30k_trainloader, flickr30k_testloader],
     # [caltech101_trainloader, caltech101_testloader],
     # [cifar_trainloader, cifar_testloader],
@@ -130,14 +130,14 @@ BackBoneInstance = [
 #================
 # Database system
 # Name: ["Caltech101", "Cifar10", "Oxford102Flower", "Coco2017"]
-database_name = ["Oxford102Flower"]
-# database_name = ["Coco2017"]
+# database_name = ["Oxford102Flower"]
+database_name = ["Coco2017"]
 mydataloader = []
 # 0: caltech101
 # 1: cifar10
 # 2: oxford102flower
 # 3: coco2017
-database_id = [2] # corresponding to index value of dataloader
+database_id = [0] # corresponding to index value of dataloader
 for idx in database_id:
     mydataloader.append(all_dataloader[idx])
 # Index system
@@ -145,7 +145,7 @@ for idx in database_id:
 feature_dim = [512, 2048, 576, 960, 768, 576] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
 # feature_dim = [512] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
 RawIndex_bitdepth = [0]
-FaissLSH_bitdepth = [1024, 2048]
+FaissLSH_bitdepth = [16, 32, 64, 128, 256, 512, 1024, 2048]
 CustomLSH_bitdepth = [1, 2, 3, 4, 5, 6, 7, 8]
 bitdepth_config = [
     RawIndex_bitdepth,
@@ -161,7 +161,7 @@ index_creator_config = [
 # FaissRawIndex: 0
 # FaissLSHIndex: 1
 # CustomLSHIndex: 2
-index_type = [2] # IMPORTANT PARAM ==================================================
+index_type = [1] # IMPORTANT PARAM ==================================================
 Index_instances = []
 for index_type_id in range(0, len(index_type), 1):
     index_type_list = []
