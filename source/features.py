@@ -148,14 +148,7 @@ class EfficientNetBase(FeatureDescriptor):
         self.model = self.model.to(self._device)
     def extractFeature(self, img):
         final_f = self.model(img)['final_feature']
-        final_f = final_f.squeeze()
-        # feature = self.model(img)
-        # #print("Shape of feature = ", feature.shape)
-        # # return torch.flatten(feature, start_dim=1)
-        # compact_f = torch.nn.AdaptiveAvgPool2d(1)(feature)
-        # final_f = torch.flatten(compact_f, start_dim=1)
-        # print("[efficient feature]: shape of final feature = ", final_f.shape)
-        return final_f
+        return final_f.view(final_f.size(0), -1) # Flatten the output
 
 # Our base model
 class ResDeepFeature(FeatureDescriptor):
