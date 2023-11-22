@@ -135,7 +135,26 @@ class MobileNetV3_custom(FeatureDescriptor):
         self.model = torch.nn.Sequential(*(list(model.children())[:-1])) # strips off last linear layer
         
     
-
+from torchvision.models import efficientnet_b4
+class EfficientNetBase(FeatureDescriptor):
+    def __init__(self) -> None:
+        super().__init__()
+        model = models.efficientnet_b4()
+        return_nodes = {
+            'avgpool':'final_feature'
+        }
+        self.model = create_feature_extractor(self.model, return_nodes=return_nodes)
+        # self.model = self.model.features
+        self.model = self.model.to(self._device)
+    def extractFeature(self, img):
+        final_f = self.model(img)['final_feature']
+        # feature = self.model(img)
+        # #print("Shape of feature = ", feature.shape)
+        # # return torch.flatten(feature, start_dim=1)
+        # compact_f = torch.nn.AdaptiveAvgPool2d(1)(feature)
+        # final_f = torch.flatten(compact_f, start_dim=1)
+        print("[efficient feature]: shape of final feature = ", final_f.shape)
+        return final_f
 
 # Our base model
 class ResDeepFeature(FeatureDescriptor):

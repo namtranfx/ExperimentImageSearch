@@ -100,9 +100,9 @@ coco_val = CustomCocoDataset(root=f'{dataDir_val}/{dataType_val}', annFile=annFi
 #-----------------------------------------------
 
 all_dataloader = [
-    # [DataLoader(caltech101_train, batch_size=1), DataLoader(caltech101_test, batch_size=1)],
-    # [DataLoader(cifar10_train, batch_size=1), DataLoader(cifar10_test, batch_size=1)],
-    # [DataLoader(oxford102flower_train, batch_size=1), DataLoader(oxford102flower_test, batch_size=1)],
+    [DataLoader(caltech101_train, batch_size=1), DataLoader(caltech101_test, batch_size=1)],
+    [DataLoader(cifar10_train, batch_size=1), DataLoader(cifar10_test, batch_size=1)],
+    [DataLoader(oxford102flower_train, batch_size=1), DataLoader(oxford102flower_test, batch_size=1)],
     [DataLoader(coco_train, batch_size=1), DataLoader(coco_val, batch_size=1)],
     # [flickr30k_trainloader, flickr30k_testloader],
     # [caltech101_trainloader, caltech101_testloader],
@@ -113,6 +113,7 @@ all_dataloader = [
 ]
 BackBoneInstance = [
     # Resnet18_custom_best(),
+    EfficientNetBase(),
     Resnet18Descriptor(),
     Resnet50Descriptor(), 
     MobileNetV3Feature(),
@@ -142,7 +143,7 @@ for idx in database_id:
     mydataloader.append(all_dataloader[idx])
 # Index system
 # feature_dim = [512, 2048, 576, 960, 768, 576]
-feature_dim = [512, 2048, 576, 960, 768, 576] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
+feature_dim = [1792, 512, 2048, 576, 960, 768, 576] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
 # feature_dim = [512] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
 RawIndex_bitdepth = [0]
 FaissLSH_bitdepth = [16, 32, 64, 128, 256, 512, 1024, 2048]
@@ -161,7 +162,7 @@ index_creator_config = [
 # FaissRawIndex: 0
 # FaissLSHIndex: 1
 # CustomLSHIndex: 2
-index_type = [1] # IMPORTANT PARAM ==================================================
+index_type = [0] # IMPORTANT PARAM ==================================================
 Index_instances = []
 for index_type_id in range(0, len(index_type), 1):
     index_type_list = []
