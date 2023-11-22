@@ -139,7 +139,7 @@ from torchvision.models import efficientnet_b4
 class EfficientNetBase(FeatureDescriptor):
     def __init__(self) -> None:
         super().__init__()
-        model = models.efficientnet_b4()
+        self.model = models.efficientnet_b4()
         return_nodes = {
             'avgpool':'final_feature'
         }
