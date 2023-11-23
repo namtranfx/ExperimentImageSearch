@@ -115,11 +115,11 @@ BackBoneInstance = [
     # Resnet18_custom_best(),
     EfficientNetBase(),
     Resnet18Descriptor(),
-    Resnet50Descriptor(), 
-    MobileNetV3Feature(),
-    MobileNetV3Feature_large(),
-    SwinTransformer_default(),
-    tinyvit(),
+    # Resnet50Descriptor(), 
+    # MobileNetV3Feature(),
+    # MobileNetV3Feature_large(),
+    # SwinTransformer_default(),
+    # tinyvit(),
     # tinyvit_small(),
     # MyEfficientViT()
 ]
@@ -132,7 +132,7 @@ BackBoneInstance = [
 # Database system
 # Name: ["Caltech101", "Cifar10", "Oxford102Flower", "Coco2017"]
 # database_name = ["Oxford102Flower"]
-database_name = ["Coco2017"]
+database_name = ["Caltech101"]
 mydataloader = []
 # 0: caltech101
 # 1: cifar10
@@ -142,8 +142,8 @@ database_id = [0] # corresponding to index value of dataloader
 for idx in database_id:
     mydataloader.append(all_dataloader[idx])
 # Index system
-# feature_dim = [512, 2048, 576, 960, 768, 576]
-feature_dim = [1792, 512, 2048, 576, 960, 768, 576] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
+# feature_dim = [1792,512, 2048, 576, 960, 768, 576]
+feature_dim = [1792, 512] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
 # feature_dim = [512] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
 RawIndex_bitdepth = [0]
 FaissLSH_bitdepth = [16, 32, 64, 128, 256, 512, 1024, 2048]
