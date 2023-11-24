@@ -132,7 +132,7 @@ BackBoneInstance = [
 # Database system
 # Name: ["Caltech101", "Cifar10", "Oxford102Flower", "Coco2017"]
 # database_name = ["Oxford102Flower"]
-database_name = ["Caltech101", "Cifar10", "Oxford102Flower","Coco2017"]
+database_name = ["Coco2017"]
 mydataloader = []
 # 0: caltech101
 # 1: cifar10
@@ -143,7 +143,7 @@ for idx in database_id:
     mydataloader.append(all_dataloader[idx])
 # Index system
 # feature_dim = [1792,512, 2048, 576, 960, 768, 576]
-feature_dim = [1792, 512] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
+feature_dim = [512, 2048, 576, 960, 768, 576] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
 # feature_dim = [512] # resnet18, resnet50, mobilenetv3_small, mobilenetv3_large, swin_vit, tiny_vit
 RawIndex_bitdepth = [0]
 FaissLSH_bitdepth = [16, 32, 64, 128, 256, 512, 1024, 2048]
