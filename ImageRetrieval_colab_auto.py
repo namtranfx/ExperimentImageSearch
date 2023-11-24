@@ -113,13 +113,13 @@ all_dataloader = [
 ]
 BackBoneInstance = [
     # Resnet18_custom_best(),
-    EfficientNetBase(),
+    # EfficientNetBase(),
     Resnet18Descriptor(),
-    # Resnet50Descriptor(), 
-    # MobileNetV3Feature(),
-    # MobileNetV3Feature_large(),
-    # SwinTransformer_default(),
-    # tinyvit(),
+    Resnet50Descriptor(), 
+    MobileNetV3Feature(),
+    MobileNetV3Feature_large(),
+    SwinTransformer_default(),
+    tinyvit(),
     # tinyvit_small(),
     # MyEfficientViT()
 ]
@@ -132,13 +132,13 @@ BackBoneInstance = [
 # Database system
 # Name: ["Caltech101", "Cifar10", "Oxford102Flower", "Coco2017"]
 # database_name = ["Oxford102Flower"]
-database_name = ["Caltech101", "Cifar10"]
+database_name = ["Coco2017"]
 mydataloader = []
 # 0: caltech101
 # 1: cifar10
 # 2: oxford102flower
 # 3: coco2017
-database_id = [0, 1] # corresponding to index value of dataloader
+database_id = [3] # corresponding to index value of dataloader
 for idx in database_id:
     mydataloader.append(all_dataloader[idx])
 # Index system
