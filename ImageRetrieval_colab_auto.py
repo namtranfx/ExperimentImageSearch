@@ -132,7 +132,7 @@ BackBoneInstance = [
 # Database system
 # Name: ["Caltech101", "Cifar10", "Oxford102Flower", "Coco2017"]
 # database_name = ["Oxford102Flower"]
-database_name = ["Coco2017"]
+database_name = ["Caltech101", "Cifar10", "Oxford102Flower","Coco2017"]
 mydataloader = []
 # 0: caltech101
 # 1: cifar10
