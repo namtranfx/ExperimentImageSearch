@@ -138,7 +138,7 @@ mydataloader = []
 # 1: cifar10
 # 2: oxford102flower
 # 3: coco2017
-database_id = [3] # corresponding to index value of dataloader
+database_id = [0] # corresponding to index value of dataloader
 for idx in database_id:
     mydataloader.append(all_dataloader[idx])
 # Index system
