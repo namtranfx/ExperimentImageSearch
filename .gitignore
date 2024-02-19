@@ -1,8 +1,0 @@
-*.pyc
-source/__pycache__/*
-data
-index
-result
-log
-./testfunc.py
-
