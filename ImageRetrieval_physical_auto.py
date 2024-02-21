@@ -11,19 +11,6 @@ from source.index import *
 from source.ultis import to_rgb
 
 ############################################################################################
-################################# DATASET PATH #############################################
-############################################################################################
-
-# PATH_COREL5K = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\Corel-5k\\images"
-# PATH_COREL10K = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\Corel-10k"
-# PATH_HOLIDAY = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\The INRIA Holidays dataset\\jpg"
-# PATH_OXFORD5K = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\oxbuild_images"
-# PATH_CALTECH256 = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\caltech-101\\256_ObjectCategories"
-
-
-# datasetpath = [PATH_COREL5K, PATH_COREL10K, PATH_HOLIDAY, PATH_OXFORD5K, PATH_CALTECH101, PATH_CALTECH256]
-
-############################################################################################
 ################################# CUSTOM DATASET ###########################################
 ############################################################################################
 transform_img = MyTransform()
@@ -48,8 +35,6 @@ PATH_OXFORD102FLOWERS_TEST = "D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_tes
 oxford102flower_train = Oxford102Flower(PATH_OXFORD102FLOWERS_TRAIN, transform_img)
 oxford102flower_test = Oxford102Flower(PATH_OXFORD102FLOWERS_TEST, transform_img)
 
-# NUS-WIDE DATASET
-
 # MS-COCO 2017 DATASET
 dataDir = 'D:\\hcmus\\1. KHOA_LUAN\\current_work\\program_test\\dataset\\coco2017'
 
@@ -64,50 +49,15 @@ coco_val = CustomCocoDataset(root=f'{dataDir}/{dataType_val}', annFile=annFile_v
 
 # =============================================================================================
 
-# inriaHoliday_train = torch.utils.data.Subset(inriaHolidayds, inriaHoliday_train_indices)
-# inriaHoliday_test = torch.utils.data.Subset(inriaHolidayds, inriaHoliday_test_indices)
-
 ############################################################################################
-################################# CUSTOM DATALOADER ########################################
+################################# DATALOADER ###############################################
 ############################################################################################
-# transform = torchvision.transforms.Compose(
-    
-#     [torchvision.transforms.Lambda(lambda image: to_rgb(image)),
-#      torchvision.transforms.Resize((224, 224)),
-#      torchvision.transforms.ToTensor()#,
-#      #torchvision.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-#      ])
-# cifar_trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
-# cifar_testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
-# cifar_trainloader = torch.utils.data.DataLoader(cifar_trainset, batch_size=1)#, shuffle=True, num_workers=2)
-# cifar_testloader = torch.utils.data.DataLoader(cifar_testset, batch_size=1)#, shuffle=False, num_workers=2)
-#-----------------------------------------------
-
-# caltech101 = torchvision.datasets.Caltech101(root='./data', download=True, transform=transform)
-# caltech101train, caltech101test = torch.utils.data.random_split(caltech101, [int(len(caltech101)*0.8), len(caltech101) - int(len(caltech101)*0.8)])
-# caltech101_trainloader = torch.utils.data.DataLoader(caltech101train, batch_size=1)#, shuffle=True, num_workers=2)
-# caltech101_testloader = torch.utils.data.DataLoader(caltech101test, batch_size=1)#, shuffle=False, num_workers=2)
-
-#--------------------------------------------------
-# flickr30k = torchvision.datasets.Flickr30k(root='./data', transform=transform, ann_file=".\\data\\captions.txt")
-# flickr30k_train, flickr30k_test = train_test_split(range(len(flickr30k)), test_size=0.2)
-# flickr30k_trainloader = torch.utils.data.DataLoader(flickr30k_train, batch_size=1)#, shuffle=True, num_workers=2)
-# flickr30k_testloader = torch.utils.data.DataLoader(flickr30k_test, batch_size=1)#, shuffle=False, num_workers=2)
-
-
-#-----------------------------------------------
 
 all_dataloader = [
     [DataLoader(caltech101_train, batch_size=1), DataLoader(caltech101_test, batch_size=1)],
     [DataLoader(cifar10_train, batch_size=1), DataLoader(cifar10_test, batch_size=1)],
     [DataLoader(oxford102flower_train, batch_size=1), DataLoader(oxford102flower_test, batch_size=1)],
     [DataLoader(coco_train, batch_size=1), DataLoader(coco_val, batch_size=1)],
-    # [flickr30k_trainloader, flickr30k_testloader],
-    # [caltech101_trainloader, caltech101_testloader],
-    # [cifar_trainloader, cifar_testloader],
-    # [DataLoader(oxford5k_train, batch_size=1), DataLoader(oxford5k_test, batch_size=1)],
-    # [DataLoader(corel5k_train, batch_size=1), DataLoader(corel5k_test, batch_size=1)],
-    # [DataLoader(inriaHoliday_train, batch_size=1), DataLoader(inriaHoliday_test, batch_size=1)]
 ]
 BackBoneInstance = [
     # Resnet18_custom_best(),
