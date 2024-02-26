@@ -319,6 +319,7 @@ class FaissLSHIndex(FaissRawIndex):
     def __init__(self, feature_size, hash_width) -> None:
         super().__init__(feature_size)
         self._faiss_index = faiss.IndexLSH(feature_size, hash_width)
+        
     
 class CustomAnnoyIndex(MyIndex):
     # f_len : length of feature need to be indexed
