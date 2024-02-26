@@ -14,3 +14,4 @@ GPUtil
 psutil
 lshashpy3
 bitarray
+faiss-cpu
