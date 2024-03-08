@@ -131,6 +131,22 @@ class CustomDataset(Dataset):
     def getLabels(self):
         return self.labels
 
+
+
+class DatabaseImage(CustomDataset):
+    def getFilePath(self, root_path):
+        for obj_name in os.listdir(root_path):
+            curr_path = os.path.join(root_path, obj_name)
+            if os.path.isdir(curr_path):
+                self.getFilePath(curr_path)
+            else:
+                self.imgpath.append(curr_path)
+                self.labels.append(obj_name)
+    def __init__(self, datasetpath, transform:MyTransform) -> None:
+        super().__init__(transform)
+        self.getFilePath(datasetpath)
+
+
 class Caltech101_temp(CustomDataset):
     def __init__(self, datasetpath, transform: MyTransform) -> None:
         super().__init__(transform)
