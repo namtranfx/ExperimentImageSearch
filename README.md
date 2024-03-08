@@ -15,9 +15,24 @@
 ## Get dataset from following link:
     https://www.kaggle.com/datasets/natra2k/excbir
 ## Update dataset folder path in configuration file (as in step 3)
-Note: Fixed within 4 dataset: caltech101, cifar10, oxford102flower, coco2017
+**Note**:   
+
+For CBIR evaluation, fixed using within 4 dataset: caltech101, cifar10, oxford102flower, coco2017. Update root folder path where store these dataset.   
+
+For running test, unnecessary to update configuration file. Put specific dataset path in Command Line Argument.
+
 # Step 3: Configure the program (only for some specific tests)
-Configure the evaluation mode in file config.ini
+Configure the evaluation mode in file `config.ini`.
+
+|Key                         |Value                                             |
+| ---------------------------|----------------------------------------------    |
+|`is_local`                  |Update when evaluating system on local or kaggle  |
+|`model_names`               |List all model name want to evaluate              |
+|`model_fsize`               |List corresponding feature size of above model    |
+|`data_root_folder`          |Specify path to database                          |
+|`database_name`             |List all database names corresponding with datasets in `data_root_folder`|
+|`FaissLSH_bitdepth`         |List all bit lengths of hashing-based indexing    |
+|`index_type`                |Indice which type of indexing method is used for evaluation|
 
 # Step 4: Run
 ## Command Line Arguments
@@ -41,12 +56,12 @@ Configure the evaluation mode in file config.ini
 |`--index`                   |Enable to perform indexing progress           |
 |`--retrieve`                |Enable to perform query progress              |
 ## Run in evaluation mode
-Run file main.py with flag --evalmode to evaluate the system.   
+Run file `main.py` with flag `--evalmode` to evaluate the system.   
 `python main.py --evalmode --index --retrieve`
 ## Run in test mode
-Run file main.py without flag --evalmode   
+Run file `main.py` **without** flag `--evalmode`   
 `python main.py --dbname "dbname" --dbpath "path-to-db" --querypath "path-to-query-folder" --usehash --index --retrieve`
 
-Note: To perform just retrieving, make sure the database name follow `--dbname` is not changed!
+**Note**: To perform just retrieving, make sure the database name follow `--dbname` **is not changed**!
 
 
