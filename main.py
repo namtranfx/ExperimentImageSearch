@@ -30,6 +30,7 @@ parser.add_argument('--usehash', action='store_true')
 parser.add_argument('--timeprior', action='store_true')
 parser.add_argument('--evalmode', action='store_true')
 parser.add_argument('--multitest', action='store_true')
+parser.add_argument('--topk', action="store", dest="topk", default="5")
 
 args = parser.parse_args()
 # ##################### DATASET ##############################
@@ -85,7 +86,7 @@ if args.evalmode:
 
         else: print("[ERROR]: Check your evaluated dataset name!") 
 else:
-    test_db = DatabaseImage(args.dbpath, transform_img)
+    test_db = DatabaseImage(args.dbpath, transform_img) if args.index else None
     query_img = DatabaseImage(args.querypath, transform_img)
 
     mydataloader.append([DataLoader(test_db, batch_size=1), DataLoader(query_img, batch_size=1)])
@@ -197,7 +198,7 @@ for index_type_id in range(0, len(index_type), 1):
         perform_eval.append(perform_eval_db)
     Control_for_type.append([perform_index, perform_eval])
     
-k_top = [5]
+k_top = [int(args.topk)]
 """
 Control Structure
 [

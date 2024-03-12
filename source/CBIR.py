@@ -39,8 +39,8 @@ def list2string(mylist : list):
         final_str = final_str +  ("_" if i != 0 else "") + str(final_list[i]).strip("'(),")
     return final_str.strip(" ")
 
-
-def showRetrievalResult(query, query_label, result, result_label, curr_AP, id, meta):
+import math
+def saveRetrievalResult(query, query_label, result, result_label, curr_AP, id, meta, top_k):
     """
     Show retrieval result.
 
@@ -62,8 +62,8 @@ def showRetrievalResult(query, query_label, result, result_label, curr_AP, id, m
         hspace = 0.2   # the amount of height reserved for white space between subplots
     )
 
-    numcol = 3
-    numrow = 2
+    numcol = int(math.sqrt(top_k) + 2)
+    numrow = int(math.sqrt(top_k))
     # Reprocessing query image (from Torch tensor to RGB array image)
     
     image_np = np.array(query)
@@ -71,7 +71,7 @@ def showRetrievalResult(query, query_label, result, result_label, curr_AP, id, m
     image_np = np.squeeze(image_np) # Remove channel has length 1
     image_np = np.transpose(image_np, (1,2,0)) # Transpose to move color channels to the end
     # Show retrieved result
-    fig, axs = plt.subplots(numrow, numcol)
+    fig, axs = plt.subplots(numrow, numcol, figsize=(numcol*2, numrow*2))
     #fig.subplots_adjust(left=figure_cfg["left"], bottom=figure_cfg["bottom"], right=figure_cfg["right"], top=figure_cfg["top"], wspace=figure_cfg["wspace"], hspace=figure_cfg["hspace"])
     fig.tight_layout()
     fig.suptitle("Retrieval AP = " + str(curr_AP))
@@ -80,7 +80,8 @@ def showRetrievalResult(query, query_label, result, result_label, curr_AP, id, m
     axs[0,0].set_title(query_label)
     for i in range(numrow):
         for j in range(numcol):
-            if (i * numcol + j) == 0: continue
+            if j == 0: continue
+            if (i * numcol + j - (i + 1)) == top_k: break
             axs[i,j].imshow(imread(result[idx_img][0]))
             axs[i,j].set_title(list2string(result_label[idx_img]) if len(result_label[idx_img]) != 0 else "<empty>")
             idx_img = idx_img + 1
@@ -88,7 +89,7 @@ def showRetrievalResult(query, query_label, result, result_label, curr_AP, id, m
     plt.savefig("." + os.sep + "result" + os.sep + meta[0] + "_by_" + meta[1] + "_with_" + str(id) + ".png", bbox_inches='tight')
     plt.close()
 
-def saveRetrievalResult(query, query_label, result, result_label, curr_AP, id, meta):
+def saveRetrievedImage(query, query_label, result, result_label, curr_AP, id, meta):
     """
     Show retrieval result.
 
@@ -294,8 +295,8 @@ class CBIR:
                 
                 curr_AP = AP(real_label, retrieved_labels, k_top)
 
-                showRetrievalResult(query_tensor, real_label, retrieved_imgpath, retrieved_labels, curr_AP, tag, self.metadata)
-                saveRetrievalResult(query_tensor, real_label, retrieved_imgpath, retrieved_labels, curr_AP, tag, self.metadata)
+                saveRetrievalResult(query_tensor, real_label, retrieved_imgpath, retrieved_labels, curr_AP, tag, self.metadata, k_top)
+                saveRetrievedImage(query_tensor, real_label, retrieved_imgpath, retrieved_labels, curr_AP, tag, self.metadata)
                 
     def evalRetrieval(self, dataloader, k_top, list_demo:list = []):
         """
@@ -353,17 +354,18 @@ class CBIR:
 
             for item in list_demo:
                 if num_query == item:
-                    showRetrievalResult(img.cpu(), real_label, retrieved_imgpath, retrieved_labels, curr_AP, num_query, self.metadata)
-                    saveRetrievalResult(img.cpu(), real_label, retrieved_imgpath, retrieved_labels, curr_AP, num_query, self.metadata)
+                    saveRetrievalResult(img.cpu(), real_label, retrieved_imgpath, retrieved_labels, curr_AP, num_query, self.metadata, k_top)
+                    saveRetrievedImage(img.cpu(), real_label, retrieved_imgpath, retrieved_labels, curr_AP, num_query, self.metadata)
             num_query = num_query + 1
         
         # Save best and worst retrieval result
-        saveRetrievalResult(minAP_data[0], minAP_data[1], minAP_data[2], minAP_data[3], min_AP, str(minAP_data[4]) + "WORST_RESULT", self.metadata)
-        showRetrievalResult(minAP_data[0], minAP_data[1], minAP_data[2], minAP_data[3], min_AP, str(minAP_data[4]) + "WORST_RESULT", self.metadata)
-        
-        saveRetrievalResult(maxAP_data[0], maxAP_data[1], maxAP_data[2], maxAP_data[3], max_AP, str(maxAP_data[4]) + "BEST_RESULT", self.metadata)
-        showRetrievalResult(maxAP_data[0], maxAP_data[1], maxAP_data[2], maxAP_data[3], max_AP, str(maxAP_data[4]) + "BEST_RESULT", self.metadata)
-        
+        if minAP_data:    
+            saveRetrievedImage(minAP_data[0], minAP_data[1], minAP_data[2], minAP_data[3], min_AP, str(minAP_data[4]) + "WORST_RESULT", self.metadata)
+            saveRetrievalResult(minAP_data[0], minAP_data[1], minAP_data[2], minAP_data[3], min_AP, str(minAP_data[4]) + "WORST_RESULT", self.metadata, k_top)
+        if maxAP_data:    
+            saveRetrievedImage(maxAP_data[0], maxAP_data[1], maxAP_data[2], maxAP_data[3], max_AP, str(maxAP_data[4]) + "BEST_RESULT", self.metadata)
+            saveRetrievalResult(maxAP_data[0], maxAP_data[1], maxAP_data[2], maxAP_data[3], max_AP, str(maxAP_data[4]) + "BEST_RESULT", self.metadata, k_top)
+            
         if num_query == 0: print("No query image found!")
         else:
             log = "System Hardware Specifications\n"
