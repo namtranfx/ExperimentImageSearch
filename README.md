@@ -46,6 +46,7 @@ Configure the evaluation mode in file `config.ini`.
 |`--usehash`                 |Enable to perform indexing with hash code     | 
 |`--timeprior`               |Enable to use lightweight feature extractor   |
 |`--multitest`               |Enable multi testing                          |
+|`--topk <int>`              |Number of image to retrieve (default: 5)      |
 ### For evaluating:
 | Flag                       | Description                                  |
 | -----------                | -----------                                  |
@@ -60,7 +61,7 @@ Run file `main.py` with flag `--evalmode` to evaluate the system.
 `python main.py --evalmode --index --retrieve`
 ## Run in test mode
 Run file `main.py` **without** flag `--evalmode`   
-`python main.py --dbname "dbname" --dbpath "path-to-db" --querypath "path-to-query-folder" --usehash --index --retrieve`
+`python main.py --dbname "dbname" --dbpath "path-to-db" --querypath "path-to-query-folder" --usehash --index --retrieve --topk 9`
 
 **Note**: To perform just retrieving, make sure the database name follow `--dbname` **is not changed**!
 
