@@ -352,7 +352,8 @@ class CBIR:
                 del maxAP_data
                 maxAP_data = list([img.cpu(), real_label, retrieved_imgpath, retrieved_labels, num_query])
             if mid_AP == 0:
-                if curr_AP > 55 and curr_AP < 70:
+                if curr_AP*100 > 55 and curr_AP*100 < 70:
+                    mid_AP = curr_AP
                     midAP_data = list([img.cpu(), real_label, retrieved_imgpath, retrieved_labels, num_query])
             sumAP = sumAP + curr_AP
 
