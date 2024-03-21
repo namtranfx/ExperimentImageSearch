@@ -31,6 +31,6 @@ def AP(ground_true, retrieved, k_top)->float:
     for i in range(1, k_top + 1):
         sum_precision = sum_precision + precisionAtk(ground_true, retrieved, i) * (1 if Similarity(ground_true, retrieved[i - 1]) else 0 ) 
     # print("AP============", float(sum_precision)/k_top)
-    #return float(sum_precision)/k_top
-    return float(sum_precision)/n_relevant
+    return float(sum_precision)/k_top
+    #return float(sum_precision)/n_relevant
 

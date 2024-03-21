@@ -321,6 +321,8 @@ class CBIR:
         minAP_data = None
         max_AP = 0
         maxAP_data = None
+        mid_AP = 0
+        midAP_data = None
 
         self._m_model.eval()
         for batch in tqdm(dataloader):
@@ -349,7 +351,9 @@ class CBIR:
                 max_AP = curr_AP * 100
                 del maxAP_data
                 maxAP_data = list([img.cpu(), real_label, retrieved_imgpath, retrieved_labels, num_query])
-
+            if mid_AP == 0:
+                if curr_AP > 55 and curr_AP < 70:
+                    midAP_data = list([img.cpu(), real_label, retrieved_imgpath, retrieved_labels, num_query])
             sumAP = sumAP + curr_AP
 
             for item in list_demo:
@@ -365,6 +369,9 @@ class CBIR:
         if maxAP_data:    
             saveRetrievedImage(maxAP_data[0], maxAP_data[1], maxAP_data[2], maxAP_data[3], max_AP, str(maxAP_data[4]) + "BEST_RESULT", self.metadata)
             saveRetrievalResult(maxAP_data[0], maxAP_data[1], maxAP_data[2], maxAP_data[3], max_AP, str(maxAP_data[4]) + "BEST_RESULT", self.metadata, k_top)
+        if midAP_data:    
+            saveRetrievedImage(midAP_data[0], midAP_data[1], midAP_data[2], midAP_data[3], mid_AP, str(midAP_data[4]) + "MID_RESULT", self.metadata)
+            saveRetrievalResult(midAP_data[0], midAP_data[1], midAP_data[2], midAP_data[3], mid_AP, str(midAP_data[4]) + "MID_RESULT", self.metadata, k_top)
             
         if num_query == 0: print("No query image found!")
         else:
