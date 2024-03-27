@@ -306,9 +306,10 @@ class CBIR:
             k_top: number of retrieval elements
             list_demo: list that indicate the index of image wanna using as single query
         """
+        queryset_len = len(dataloader.dataset)
         if len(list_demo) == 0:
-            number_demo = 5
-            list_demo = random.sample(range(1,len(dataloader.dataset)), number_demo)
+            number_demo = 5 if queryset_len >= 8 else queryset_len - 3
+            list_demo = random.sample(range(0,queryset_len), number_demo)
         self.loadDB()
         # self._m_model.loadDescriptor()
         log = "Start evaluating database " + self.metadata[0] + " using feature " + self.metadata[1] + " with k = " + str(k_top) + "...\n"
@@ -359,8 +360,8 @@ class CBIR:
 
             for item in list_demo:
                 if num_query == item:
-                    saveRetrievalResult(img.cpu(), real_label, retrieved_imgpath, retrieved_labels, curr_AP, num_query, self.metadata, k_top)
-                    saveRetrievedImage(img.cpu(), real_label, retrieved_imgpath, retrieved_labels, curr_AP, num_query, self.metadata)
+                    saveRetrievalResult(img.cpu(), real_label, retrieved_imgpath, retrieved_labels, curr_AP * 100, num_query, self.metadata, k_top)
+                    saveRetrievedImage(img.cpu(), real_label, retrieved_imgpath, retrieved_labels, curr_AP * 100, num_query, self.metadata)
             num_query = num_query + 1
         
         # Save best and worst retrieval result
