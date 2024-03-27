@@ -87,7 +87,7 @@ if args.evalmode:
         else: print("[ERROR]: Check your evaluated dataset name!") 
 else:
     test_db = DatabaseImage(args.dbpath, transform_img) if args.index else None
-    query_img = DatabaseImage(args.querypath, transform_img)
+    query_img = DatabaseImage(args.querypath, transform_img) if args.retrieve else None
 
     mydataloader.append([DataLoader(test_db, batch_size=1), DataLoader(query_img, batch_size=1)])
     database_name = [args.dbname]
@@ -228,6 +228,10 @@ for index_type_id in range(0, len(index_type), 1):
             # Evaluate phase
             if Control_for_type[index_type_id][1][idx_db][idx_cbir] == True:
                 for k in k_top:
-                    TestSearch[index_type_id][idx_db][idx_cbir].evalRetrieval(mydataloader[idx_db][1], k)
+                    if args.evalmode:
+                        TestSearch[index_type_id][idx_db][idx_cbir].evalRetrieval(mydataloader[idx_db][1], k)
+                    else:
+                        TestSearch[index_type_id][idx_db][idx_cbir].evalRetrieval(mydataloader[idx_db][1], k, range(0, len(mydataloader[idx_db][1].dataset)))
                 ii = ii + 1
             print("-------------------------------------------------------------------------------")
+
