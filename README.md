@@ -17,7 +17,14 @@
 ## Update dataset folder path in configuration file (as in step 3)
 **Note**:   
 
-For CBIR evaluation, fixed using within 4 dataset: caltech101, cifar10, oxford102flower, coco2017. Update root folder path where store these dataset.   
+For CBIR evaluation, fixed using within 4 dataset: caltech101, cifar10, oxford102flower, coco2017. Update root folder path where store these dataset. 
+
+Structure of our dataset (from above link):   
+>____DBI   
+>&nbsp;|_caltech-101   
+>&nbsp;|_cifar-10   
+>&nbsp;|_coco2017   
+>&nbsp;|_102flowers_categorized   
 
 For running test, unnecessary to update configuration file. Put specific dataset path in Command Line Argument.
 
@@ -61,7 +68,7 @@ Run file `main.py` with flag `--evalmode` to evaluate the system.
 `python main.py --evalmode --index --retrieve`
 ## Run in test mode
 Run file `main.py` **without** flag `--evalmode`   
-`python main.py --dbname "dbname" --dbpath "path-to-db" --querypath "path-to-query-folder" --usehash --index --retrieve --topk 9`
+`python main.py --dbname "dbname" --dbpath "path-to-db" --querypath "path-to-query-folder" --usehash --index --retrieve`
 
 **Note**: To perform just retrieving, make sure the database name follow `--dbname` **is not changed**!
 
