@@ -1,3 +1,7 @@
+## License
+
+This project uses source code from the TinyViT and EfficientViT model in the Microsoft repository: https://github.com/microsoft/Cream/tree/main. This project is licensed under the MIT License. For more details, please see the LICENSE file.
+
 # Step 1: Environment preparation:
 ## Create these folder and put them in project folder for running progress:
     ./index
